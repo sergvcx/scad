@@ -17,7 +17,7 @@ pin(0,0,-10,10,10,20);
 module ball(r,n,pinr)
 {
     Ro =rands(0,360,n);
-    Fi=rands(-90,90,n);
+    Fi =rands(-90,90,n);
     for(i=[2:1:n-1]){
         r0= r*cos(Fi[i-1]);
         x0=r0*cos(Ro[i-1]);
@@ -37,4 +37,4 @@ module ball(r,n,pinr)
         //z0=z1;
     }
 }
-ball(30,300,1);
+ball(30,230,1);
