@@ -50,17 +50,18 @@ function distance(x,y){
     return sqrt((x[0]-y[0])*(x[0]-y[0])+(x[1]-y[1])*(x[1]-y[1])+(x[2]-y[2])*(x[2]-y[2]));
 }
 //-----------------------------------------
-function sergoeder(poly0,poly1){
+function sergoeder(poly0,poly1,autoAlign=false){
     var polygons = [];
     if (poly0.length>=3){
         var verts0=[];
         for(i=0;i<poly0.length;i++){
             verts0[i]=new CSG.Vertex(new CSG.Vector3D(poly0[poly0.length-i-1]));
+			//verts0[i]=new CSG.Vertex(new CSG.Vector3D(poly0[i]));
         }
         polygon0=new CSG.Polygon(verts0);
         polygons.push(polygon0);
     }
-    
+   
     if (poly1.length>=3){
         var verts1=[];
         for(i=0; i<poly1.length;i++){
@@ -69,29 +70,34 @@ function sergoeder(poly0,poly1){
         polygon1=new CSG.Polygon(verts1);
         polygons.push(polygon1);
     }
+
+	var firstPair=[0,0];
+	var lastPair=[poly0.length-1,poly1.length-1];
+	
+	if (autoAlign){
+		var minDistance=distance(poly0[0],poly1[0]);
+	
+		for(i=0;i<poly1.length;i++){
+			newDistance=distance(poly0[0],poly1[i]);
+			if (newDistance<minDistance){
+				minDistance=newDistance;
+				firstPair=[0,i];
+			}
+		}
+		lastPair[1]=firstPair[1]+poly1.length-1;
+	}
+    i0=firstPair[0];
+    i1=firstPair[1];
     
-    var minDistance=distance(poly0[0],poly1[0]);
-    var minPair=[0,0];
-    
-    for(i=0;i<poly1.length;i++){
-        newDistance=distance(poly0[0],poly1[i]);
-        if (newDistance<minDistance){
-            minDistance=newDistance;
-            minPair=[0,i];
-        }
-    }
-    i0=minPair[0];
-    i0last=i0+poly0.length-1;
-    i1=minPair[1];
-    i1last=i1+poly1.length-1;
-    while((i0<=i0last) || (i1<=i1last)){
+    while((i0<=lastPair[0]) || (i1<=lastPair[1])){
+	//for(k=0; k<8;k++){
        dist1=distance(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
        dist0=distance(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
        
        if (i1>100 || i0>100)
             break;
             
-       if ((dist1<=dist0) && (i1<=i1last))
+       if ((dist1<=dist0) && (i0<=lastPair[0]+1) && (i1<=lastPair[1]))
        {
             var verts=new Array;
             verts[0]=new CSG.Vertex(new CSG.Vector3D(poly0[i0%poly0.length]));
@@ -102,7 +108,8 @@ function sergoeder(poly0,poly1){
             polygons.push(polygon);
             continue;
         }
-        if ((dist0<=dist1) && (i0<=i0last))
+        //if ((dist0<=dist1) && (i1<=lastPair[1]+1) && (i0<=lastPair[0]))
+		else
         {
             var verts=new Array;
             verts[0]=new CSG.Vertex(new CSG.Vector3D(poly0[i0%poly0.length]));
@@ -210,6 +217,43 @@ function rodHi(rodx,rody,rodHi_z,w){
 	
 	
 }
+
+function trans(poly,dx,dy=0,dz=0){
+		arr[];
+		for(i=0;i<poly.length;i++){
+			arr[i][0]=poly[i][0]+dx;
+			arr[i][1]=poly[i][1]+dy;
+			arr[i][2]=poly[i][2]+dz;
+		}
+		return arr;
+}
+function tube(rodSize,rodPos,ang,R,borderW,h,w){
+	
+	polyOut1=[	[0,0,h],
+				[rodSize[0],0,h],
+				[rodSize[0],rodSize[1],h],
+				[0,rodSize[1],h]];
+				
+	polyOut0=[];
+	var angMax=90;
+	var i=0;
+	for(ang=ang[0];ang<=ang[1];ang+=15,i++){
+		polyOut0[i]=[(nozzleR)*cos(ang),(nozzleR)*sin(ang),0];
+	}
+
+	polyIn1=[[0,0,h],[0,rody,tubeh]];
+	polyIn0=[];
+	i=0;
+	for(ang=-90;ang<=angMax;ang+=15,i++){
+		polyIn0[i]=[(nozzleR-borderW)*cos(ang),(nozzleR-borderW)*sin(ang),0];
+	}
+	
+	
+	return difference(){
+		sergoeder(polyOut0,PolyOut0,false),
+		sergoeder(polyIn,PolyUp,false)
+	};
+}
 //========================================================
 function main() {
     ShowPegGrid();
@@ -236,22 +280,19 @@ function main() {
 	//return rodHi(rodx,rody,rodHi_z,w);
 	
 	var tubeh=20;
-	poly1=[[0,0,tubeh],[rodx,0,tubeh],[rodx,rody,tubeh],[0,rody,tubeh]];
-	//poly0=[[0,0,0],[rodx,0,0],[rodx,rody,0],[0,rody,0]];
-	poly0=[];
-	var angMax=0;
-	var i=0;
-	for(ang=-90;ang<=angMax;ang+=45,i++){
-		poly0[i]=[(nozzleR-borderW)*cos(ang),(nozzleR-borderW)*sin(ang),0];
-	}
-	for(ang=angMax;ang>=-90;ang-=45,i++){
-		poly0[i]=[(nozzleR)*cos(ang),(nozzleR)*sin(ang),0];
-	}
+	
+	
+	
+	//	poly0[i]=[-11,nozzleR/2-4,0];
+	
 	
 	var shape1 = CAG.fromPoints(poly0); 
 	var shape2 = CAG.fromPoints(poly1); 
-	//return shape2;
-	return sergoeder(poly0,poly1);
+	var shapeIn1 = CAG.fromPoints(polyIn0); 
+	//return shapeIn1;
+	//model.push(sergoeder(poly0,poly1,false));
+	model.push(sergoeder(polyIn0,polyIn1,false));
+	return model;
 	
 	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,30]));
     model.push(coolerRing(17,nozzleR,4,7));
