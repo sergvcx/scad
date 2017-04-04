@@ -191,16 +191,36 @@ function coolerRing(R1,R2,h,border){
 		star(R2-3)
 	);
 }
+
+function rodHi(rodx,rody,rodHi_z,w){
+	var c0 = CAG.circle({radius: w});
+    var rect=chain_hull( 
+            c0.translate([w,w,0]),
+            c0.translate([rodx-w,w,0]),
+            c0.translate([rodx-w,rody-w,0]),
+            c0.translate([w,rody-w,0]),
+            c0.translate([w,w,0])
+            );
+
+    return rect.extrude({offset: [0,0,rodHi_z], twistangle: 0}).rotateZ(0);
+    //rodHi = rotate([0,0,-30],rodHi);
+    //rodHi = rodHi.translate([0,0,rod_z-rodHi_z]);
+    //model.push(rodHi);
+    //rod   = rect.extrude({offset: [0,0,rodLo_z], twistangle: -30, twiststeps: 100});
+	
+	
+}
 //========================================================
 function main() {
     ShowPegGrid();
 
+	
     var dx0=10;
     var dx1=10;
     var dy0=10;
     var dy1=10;
     var h =30;
-        var w=0.5;
+    var w=0.5;
     var rodx=10;
     var rody=20;
     var rod_z=60;
@@ -210,27 +230,31 @@ function main() {
     var nozzleH=5;
     var nozzleR0=15;
     var round=3;
+	var rodDx=17;
+	var rodDy=-17;
+	var borderW=4;
+	//return rodHi(rodx,rody,rodHi_z,w);
 	
-    var lo2=[[0,0,0],[dx0,2,0]];
-    var lo3=[[0,0,0],[dx0,2,0],[dx0,dy0,0]];
-    var lo4=[[0,0,0],[dx0,2,0],[dx0,dy0,0],[0,dy0,0]];
-    var lo5=[[0,0,0],[dx0,2,0],[dx0,dy0,0],[0,dy0,0],[-5,5,0]];
-    //var hi=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[2,dy1,h]];
-    var hi5=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[0,dy1,h],[-5,5,h]];
-    var hi4=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[0,dy1,h]];
-    var hi3=[[0,0,h],[dx1,0,h],[dx1,dy1,h]];
-    var hi2=[[0,0,h],[dx1,0,h]];
-    var tri=[[0,0,h],[dx1,0,h],[dx1,dy1,h]];
-    var circ=[];
-    for(i=0 ;i<15; i++){
-        circ[i]=[10*cos(i*360/15),10*sin(i*360/15),10+i];
-    }
-    var circlo=[];
-    for(i=0 ;i<15; i++){
-        circlo[i]=[10*cos(i*360/15),10*sin(i*360/15),0];
-    }
-	//model.push(star(nozzleR-1,2));
-	model.push(coolerRing(17,nozzleR,4,7));
+	var tubeh=20;
+	poly1=[[0,0,tubeh],[rodx,0,tubeh],[rodx,rody,tubeh],[0,rody,tubeh]];
+	//poly0=[[0,0,0],[rodx,0,0],[rodx,rody,0],[0,rody,0]];
+	poly0=[];
+	var angMax=0;
+	var i=0;
+	for(ang=-90;ang<=angMax;ang+=45,i++){
+		poly0[i]=[(nozzleR-borderW)*cos(ang),(nozzleR-borderW)*sin(ang),0];
+	}
+	for(ang=angMax;ang>=-90;ang-=45,i++){
+		poly0[i]=[(nozzleR)*cos(ang),(nozzleR)*sin(ang),0];
+	}
+	
+	var shape1 = CAG.fromPoints(poly0); 
+	var shape2 = CAG.fromPoints(poly1); 
+	//return shape2;
+	return sergoeder(poly0,poly1);
+	
+	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,30]));
+    model.push(coolerRing(17,nozzleR,4,7));
     model.push(extruder());
    // model.push(sergoeder(lo4,hi5));
     
@@ -238,21 +262,8 @@ function main() {
     return model;
 
     
-    var c0 = CAG.circle({radius: w});
-    var rect=chain_hull( 
-            c0.translate([w,w,0]),
-            c0.translate([rodx-w,w,0]),
-            c0.translate([rodx-w,rody-w,0]),
-            c0.translate([w,rody-w,0]),
-            c0.translate([w,w,0])
-            );
+    
 
-
-    rodHi = rect.extrude({offset: [0,0,rodHi_z], twistangle: 0});
-    rodHi = rotate([0,0,-30],rodHi);
-    rodHi = rodHi.translate([0,0,rod_z-rodHi_z]);
-    model.push(rodHi);
-    rod   = rect.extrude({offset: [0,0,rodLo_z], twistangle: -30, twiststeps: 100});
 
 
     nozzleOut= roundBox(nozzleR,nozzleH,round,true,false);
@@ -272,4 +283,24 @@ function main() {
     return model;
 
 }
-
+/*
+var lo2=[[0,0,0],[dx0,2,0]];
+    var lo3=[[0,0,0],[dx0,2,0],[dx0,dy0,0]];
+    var lo4=[[0,0,0],[dx0,2,0],[dx0,dy0,0],[0,dy0,0]];
+    var lo5=[[0,0,0],[dx0,2,0],[dx0,dy0,0],[0,dy0,0],[-5,5,0]];
+    //var hi=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[2,dy1,h]];
+    var hi5=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[0,dy1,h],[-5,5,h]];
+    var hi4=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[0,dy1,h]];
+    var hi3=[[0,0,h],[dx1,0,h],[dx1,dy1,h]];
+    var hi2=[[0,0,h],[dx1,0,h]];
+    var tri=[[0,0,h],[dx1,0,h],[dx1,dy1,h]];
+    var circ=[];
+    for(i=0 ;i<15; i++){
+        circ[i]=[10*cos(i*360/15),10*sin(i*360/15),10+i];
+    }
+    var circlo=[];
+    for(i=0 ;i<15; i++){
+        circlo[i]=[10*cos(i*360/15),10*sin(i*360/15),0];
+    }
+	//model.push(star(nozzleR-1,2));
+	*/
