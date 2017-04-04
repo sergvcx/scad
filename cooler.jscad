@@ -218,41 +218,53 @@ function rodHi(rodx,rody,rodHi_z,w){
 	
 }
 
-function trans(poly,dx,dy=0,dz=0){
-		arr[];
-		for(i=0;i<poly.length;i++){
-			arr[i][0]=poly[i][0]+dx;
-			arr[i][1]=poly[i][1]+dy;
-			arr[i][2]=poly[i][2]+dz;
-		}
-		return arr;
+function trans(poly,dx,dy,dz){
+	arr=[];
+	for(i=0;i<poly.length;i++){
+		p=poly[i];
+		arr[i]=[p[0]+dx,p[1]+dy,p[2]+dz];
+	}
+	return arr;
+}
+function rot(poly,ang){
+	arr=[];
+	for(i=0;i<poly.length;i++){
+		p=poly[i];
+		a=atan2(p[1],p[0]);
+		a+=ang;
+		r=sqrt(p[0]*p[0]+p[1]*p[1]);
+		arr[i]=[r*cos(a),r*sin(a),p[2]];
+	}
+	return arr;
 }
 function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	
-	polyOut1=[	[0,0,h],
+	polyOutHi=[	[0,0,h],
 				[rodSize[0],0,h],
 				[rodSize[0],rodSize[1],h],
 				[0,rodSize[1],h]];
 				
-	polyOut0=[];
-	var angMax=90;
+	//polyOutHi=trans(polyOutHi,rodPos[0],rodPos[1],rodPos[2]);
+	polyOutHi=rot(polyOutHi,-30);
+	polyOutHi=trans(polyOutHi,rodPos[0],rodPos[1],0);
+	polyOutLo=[];
 	var i=0;
-	for(ang=ang[0];ang<=ang[1];ang+=15,i++){
-		polyOut0[i]=[(nozzleR)*cos(ang),(nozzleR)*sin(ang),0];
+	for(a=ang[0];a<=ang[1];a+=15,i++){
+		polyOutLo[i]=[(R)*cos(a),(R)*sin(a),0];
 	}
 
-	polyIn1=[[0,0,h],[0,rody,tubeh]];
-	polyIn0=[];
-	i=0;
-	for(ang=-90;ang<=angMax;ang+=15,i++){
-		polyIn0[i]=[(nozzleR-borderW)*cos(ang),(nozzleR-borderW)*sin(ang),0];
-	}
+	//polyIn1=[[0,0,h],[0,rody,tubeh]];
+	//polyIn0=[];
+	//i=0;
+	//for(ang=-90;ang<=angMax;ang+=15,i++){
+	//	polyIn0[i]=[(nozzleR-borderW)*cos(ang),(nozzleR-borderW)*sin(ang),0];
+	//}
 	
 	
-	return difference(){
-		sergoeder(polyOut0,PolyOut0,false),
-		sergoeder(polyIn,PolyUp,false)
-	};
+	//return difference(){
+	return 	sergoeder(polyOutLo,polyOutHi,true);
+	//	sergoeder(polyIn,PolyUp,false)
+	//};
 }
 //========================================================
 function main() {
@@ -286,12 +298,13 @@ function main() {
 	//	poly0[i]=[-11,nozzleR/2-4,0];
 	
 	
-	var shape1 = CAG.fromPoints(poly0); 
-	var shape2 = CAG.fromPoints(poly1); 
-	var shapeIn1 = CAG.fromPoints(polyIn0); 
+	//var shape1 = CAG.fromPoints(poly0); 
+	//var shape2 = CAG.fromPoints(poly1); 
+	//var shapeIn1 = CAG.fromPoints(polyIn0); 
 	//return shapeIn1;
 	//model.push(sergoeder(poly0,poly1,false));
-	model.push(sergoeder(polyIn0,polyIn1,false));
+	//model.push(sergoeder(polyIn0,polyIn1,false));
+	model.push(tube([rodx,rody],[17,-17,0],[-90,45],nozzleR+20,5,20,1,false));
 	return model;
 	
 	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,30]));
