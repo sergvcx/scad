@@ -49,6 +49,76 @@ function pyramide(dx0,dy0,dx1,dy1,h,shift){
 function distance(x,y){
     return sqrt((x[0]-y[0])*(x[0]-y[0])+(x[1]-y[1])*(x[1]-y[1])+(x[2]-y[2])*(x[2]-y[2]));
 }
+
+function centre(p0,p1){
+	return [(p0[0]+p1[0])/2,
+			(p0[1]+p1[1])/2,
+			(p0[2]+p1[2])/2];
+}
+function middleLine(p0,p1,p2){
+	return [centre(p0,p1),centre(p1,p2)];
+}
+function sub(p0,p1){
+	return [(p0[0]-p1[0]),
+			(p0[1]-p1[1]),
+			(p0[2]-p1[2])];
+}
+
+function neg(p1){
+	return [(-p1[0]),
+			(-p1[1]),
+			(-p1[2])];
+}
+
+function vec(line){
+	if(line.length!=2) throw new Error("Length should be 2!");
+	if(line[0].length!=3) throw new Error("Length should be 3!");
+	return [(line[1][0]-line[0][0]),
+			(line[1][1]-line[0][1]),
+			(line[1][2]-line[0][2])];
+}
+function add(p0,p1){
+	if (p0.length!=p1.length) throw new Error("Length should be equal!");
+	return [(p0[0]+p1[0]),
+			(p0[1]+p1[1]),
+			(p0[2]+p1[2])];
+}
+function len(vec){
+	return sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
+}
+function cosvec(vec0,vec1){
+	return ((vec0[0]*vec1[0]+vec0[1]*vec1[1]+vec0[2]*vec1[2])/len(vec0)/len(vec1));
+}
+function angle(vec0,vec1){
+	return acos(cosvec(vec0,vec1));
+}
+
+function vecMul(vec0,vec1){
+	if(vec0.length!=3 || vec1.length!=3) throw new Error("Length should be 3!");
+	var a=vec0[1]*vec1[2]-vec0[2]*vec1[1];
+	var b=vec0[2]*vec1[0]-vec0[0]*vec1[2];
+	var c=vec0[0]*vec1[1]-vec0[1]*vec1[0];
+	return [a,b,c];
+}
+function figureCentre(p){
+	var cent=p[0];
+	for(i=1;i<p.length;i++){
+		cent=add(cent,p[i]);
+	}
+	return [cent[0]/p.length,
+			cent[1]/p.length,
+			cent[2]/p.length];
+}
+function vector(strt,vec,r,clr=[1,0,0]){
+	if (strt.length!=3 || vec.length!=3) throw new Error("Length should be 3!");
+	if (len(vec)==0) throw new Error("Zero vector");
+	return 	union(
+		cylinder({start: strt, end: add(strt,vec), r1: r, r2: r, fn: 4}),
+		//cylinder({start: add(start,vec), end: add(start,vec), r1: r+1, r2: 0, fn: 50})
+		sphere(r*2).translate(add(strt,vec))
+		).setColor(clr);
+		
+}
 //-----------------------------------------
 function sergoeder(poly0,poly1,autoAlign=false){
     var polygons = [];
@@ -88,24 +158,104 @@ function sergoeder(poly0,poly1,autoAlign=false){
 	}
     i0=firstPair[0];
     i1=firstPair[1];
-    
-    while((i0<=lastPair[0]) || (i1<=lastPair[1])){
-	//for(k=0; k<8;k++){
-       dist1=distance(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
-       dist0=distance(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
-       
-       if (i1>100 || i0>100)
-            break;
-            
-       if ((dist1<=dist0) && (i0<=lastPair[0]+1) && (i1<=lastPair[1]))
+
+	//centre(poly0[1],poly0[2]);
+    //middleLine(poly0[1],poly1[2],poly0[1]);
+	midLineL1=middleLine(poly1[(i1-1+poly1.length)%poly1.length], poly0[i0], poly1[i1] );
+	midLineL0=middleLine(poly0[(i0-1+poly0.length)%poly0.length],poly1[i1],poly0[i0]);
+	midLineR1=middleLine(poly1[i1],poly0[i0],poly1[(i1+1)%poly1.length]);
+	midLineR0=middleLine(poly0[i0],poly1[i1],poly0[(i0+1)%poly0.length]);
+	
+	//model.push(vector(midLineL0[0],vec(midLineL0),0.5));
+	//model.push(vector(midLineR0[0],vec(midLineR0),0.5));
+	//model.push(vector(midLineR1[0],vec(midLineR1),0.5));
+	
+	ang11=angle(neg(vec(midLineL1)),vec(midLineR1));
+	ang10=angle(neg(vec(midLineL1)),vec(midLineR0));
+	ang01=angle(neg(vec(midLineL0)),vec(midLineR1));
+	ang00=angle(neg(vec(midLineL0)),vec(midLineR0));
+	
+	maxAng=ang11;
+	maxPair=1;
+	if (maxAng<ang10){
+		maxAng=ang10;
+		maxPair=0;
+	}
+	if (maxAng<ang01){
+		maxAng=ang01;
+		maxPair=1;
+	}
+	if (maxAng<ang00){
+		maxAng=ang00;
+		maxPair=0;
+	}
+	
+	lastMidLine=[];
+	if (maxPair==1){
+		var verts=new Array;
+		verts[0]=new CSG.Vertex(new CSG.Vector3D(poly0[i0%poly0.length]));
+		verts[1]=new CSG.Vertex(new CSG.Vector3D(poly1[(i1+1)%poly1.length]));
+		verts[2]=new CSG.Vertex(new CSG.Vector3D(poly1[i1%poly1.length]));
+		polygon=new CSG.Polygon(verts);
+		polygons.push(polygon);
+		lastMidLine=middleLine(poly1[i1],poly0[i0],poly1[(i1+1)%poly1.length]);
+		i1++;
+	}
+	else{
+		var verts=new Array;
+		verts[0]=new CSG.Vertex(new CSG.Vector3D(poly0[i0%poly0.length]));
+		verts[1]=new CSG.Vertex(new CSG.Vector3D(poly0[(i0+1)%poly0.length]));
+		verts[2]=new CSG.Vertex(new CSG.Vector3D(poly1[i1%poly1.length]));
+		polygon=new CSG.Polygon(verts);
+		polygons.push(polygon);
+		lastMidLine=middleLine(poly0[i0],poly1[i1],poly0[(i0+1)%poly0.length]);
+		i0++;
+	}
+       	
+	centre1=figureCentre(poly1);
+	centre0=figureCentre(poly0);
+	norm = sub(centre1,centre0);
+	model.push(vector(centre1,norm,1));
+	model.push(vector(lastMidLine[0],vec(lastMidLine),0.4));
+    //while((i0<=lastPair[0]) || (i1<=lastPair[1])){
+	for(k=0; k<9;k++){
+		dist1=distance(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
+		dist0=distance(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
+		midLine1=middleLine(poly1[i1%poly1.length],poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
+		midLine0=middleLine(poly0[i0%poly0.length],poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
+
+		
+		norm1=vecMul(vec(lastMidLine),vec(midLine1));
+		norm0=vecMul(vec(lastMidLine),vec(midLine0));
+		
+		model.push(vector(midLine0[0],vec(midLine0),0.3,[0,1,0]));
+		model.push(vector(midLine1[0],vec(midLine1),0.3,[0,0,1]));
+
+		
+		
+		model.push(vector(midLine0[0],norm0,0.1,[0,1,0])); //0-G
+		model.push(vector(midLine1[0],norm1,0.1,[0,0,1])); //1-B
+		
+		
+		ang1=cosvec(norm,norm1);
+		ang0=cosvec(norm,norm0);
+		if (ang0<0) throw new Error("eng <0","asdas");
+		
+		
+		//ang1=angle(lastMidLine,midLine1);
+		//ang0=angle(lastMidLine,midLine0);
+
+		
+       if ((dist1<dist0)  && (i0<=lastPair[0]+1) && (i1<=lastPair[1]))
        {
             var verts=new Array;
             verts[0]=new CSG.Vertex(new CSG.Vector3D(poly0[i0%poly0.length]));
             verts[1]=new CSG.Vertex(new CSG.Vector3D(poly1[(i1+1)%poly1.length]));
             verts[2]=new CSG.Vertex(new CSG.Vector3D(poly1[i1%poly1.length]));
-            i1++;
             polygon=new CSG.Polygon(verts);
             polygons.push(polygon);
+			lastMidLine=middleLine(poly1[i1%poly1.length],poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
+            i1++;
             continue;
         }
         //if ((dist0<=dist1) && (i1<=lastPair[1]+1) && (i0<=lastPair[0]))
@@ -115,9 +265,10 @@ function sergoeder(poly0,poly1,autoAlign=false){
             verts[0]=new CSG.Vertex(new CSG.Vector3D(poly0[i0%poly0.length]));
             verts[1]=new CSG.Vertex(new CSG.Vector3D(poly0[(i0+1)%poly0.length]));
             verts[2]=new CSG.Vertex(new CSG.Vector3D(poly1[i1%poly1.length]));
-            i0++;
             polygon=new CSG.Polygon(verts);
             polygons.push(polygon);
+			lastMidLine=middleLine(poly0[i0%poly0.length],poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
+            i0++;
             continue;
         }
         
@@ -270,8 +421,8 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 function main() {
     ShowPegGrid();
 
-	
-    var dx0=10;
+	a = 1, b = 2;
+	var dx0=10;
     var dx1=10;
     var dy0=10;
     var dy1=10;
