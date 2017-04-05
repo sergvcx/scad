@@ -115,7 +115,7 @@ function vector(strt,vec,r,clr=[1,0,0]){
 	return 	union(
 		cylinder({start: strt, end: add(strt,vec), r1: r, r2: r, fn: 4}),
 		//cylinder({start: add(start,vec), end: add(start,vec), r1: r+1, r2: 0, fn: 50})
-		sphere(r*2).translate(add(strt,vec))
+		sphere(r).translate(add(strt,vec))
 		).setColor(clr);
 		
 }
@@ -370,7 +370,14 @@ function rodHi(rodx,rody,rodHi_z,w){
             c0.translate([w,rody-w,0]),
             c0.translate([w,w,0])
             );
-    return rect.extrude({offset: [0,0,rodHi_z], twistangle: 0}).translate([0,-rody,]).rotateZ(60);
+	w=2*w;
+	return union(
+		vector(	figureCentre([[w,w,0],[rodx-w,w,0]]),[0,0,rodHi_z],0.5),
+		vector(	figureCentre([[rodx-w,w,0],[rodx-w,rody-w,0]]),[0,0,rodHi_z],0.5),
+		vector(	figureCentre([[rodx-w,rody-w,0],[w,rody-w,0]]),[0,0,rodHi_z],0.5),
+		vector(	figureCentre([[w,rody-w,0],[w,w,0]]),[0,0,rodHi_z],0.5),
+		rect.extrude({offset: [0,0,rodHi_z], twistangle: 0})
+	).translate([0,-rody,]).rotateZ(60);
 }
 
 function trans(poly,dx,dy,dz){
@@ -461,6 +468,10 @@ function main() {
 	
 	var tubeh=20;
 	
+	model.push(cube({size:[44,5,1]}).center('x').translate([0,-17,0]));
+	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,0]));
+	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,0]).mirroredX());
+  return model;	
 	
 	
 	//	poly0[i]=[-11,nozzleR/2-4,0];
