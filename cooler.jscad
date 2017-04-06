@@ -71,8 +71,7 @@ function neg(p1){
 }
 
 function vec(line){
-	if(line.length!=2) throw new Error("Length should be 2!");
-	if(line[0].length!=3) throw new Error("Length should be 3!");
+	if(line[0].length!=3) throw new Error("vec: Length should be 3!");
 	return [(line[1][0]-line[0][0]),
 			(line[1][1]-line[0][1]),
 			(line[1][2]-line[0][2])];
@@ -83,11 +82,12 @@ function add(p0,p1){
 			(p0[1]+p1[1]),
 			(p0[2]+p1[2])];
 }
-function mul(arr,k){
+function mult(arr,k){
+	ar=[];
 	for(i=0; i<arr.length; i++){
-		arr[i]*=k;		
+		a[i]=arr[i]*k;		
 	}
-	return arr;
+	return ar;
 }
 function len(vec){
 	return sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
@@ -136,6 +136,26 @@ function vector(strt,vec,r,clr=[1,0,0]){
 		
 }
 //-----------------------------------------
+function surface(poly, clockwise=false){
+	var verts=[];
+	polygons=[];
+	if (clockwise){
+		for(i=0;i<poly.length;i++){
+			verts[i]=new CSG.Vertex(new CSG.Vector3D(poly[i]));
+		}
+	}
+	else {
+		for(i=0;i<poly.length;i++){
+			verts[i]=new CSG.Vertex(new CSG.Vector3D(poly[poly.length-i-1]));
+		}
+	}
+	polygon=new CSG.Polygon(verts);
+	
+	polygons.push(polygon);
+	solid = CSG.fromPolygons(polygons);
+	return solid;
+}
+
 function sergoeder(poly0,poly1,autoAlign=false){
     var polygons = [];
     if (poly0.length>=3){
@@ -421,13 +441,20 @@ function contract(poly,w) {
 		p0=poly[(i+poly.length-1)%poly.length];
 		p1=poly[i%poly.length];
 		p2=poly[(i+1)%poly.length];
-		vec10=vec(p1,p0);
-		vec12=vec(p1,p2);
+		vec10=sub(p0,p1);
+		vec12=sub(p2,p1);
 		vec=add(vec10,vec12);
-		vec=mul(vec,w/len(vec));
-		cont[i]=add(p0,vec);
+		l=len(vec);
+		vec=mult(vec,w/l);
+		//cont[i]=add(p0,vec);
+		cont[i]=poly[i];
 	}
 	return cont;
+}
+
+function trinagulate(poly){
+	
+	
 }
 function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	
@@ -473,8 +500,17 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 
 //========================================================
 function main() {
-    //ShowPegGrid();
+    ShowPegGrid();
 
+	
+	poly = [ [10,10,0], [-10,10,0], [0,0,0]];
+	return surface(contract(poly,1),true);
+
+	return contract(poly,3);
+	
+//	return CAG.fromPoints(poly);
+//	return CAG.fromPoints(poly);
+	return path;
 	a = 1, b = 2;
 	var dx0=10;
     var dx1=10;
