@@ -1,5 +1,20 @@
 var model = new Array();
 
+function mulc(vec,k){
+	//var arr=[];
+	var p=[];
+	//var z=[];
+	//for(i=0; i<poly.length; i++){
+		//p=poly[i];
+		p[0]=vec[0]*k;
+		p[1]=vec[1]*k;
+		p[2]=vec[2]*k;
+	//	arr[i]=p;
+	//}
+	return p;
+}
+
+
 function ShowPegGrid(Space = 10.0,Size = 1.0) {
 
    RangeX = floor(100 / Space);
@@ -76,22 +91,22 @@ function vec(line){
 			(line[1][1]-line[0][1]),
 			(line[1][2]-line[0][2])];
 }
+
 function add(p0,p1){
 	if (p0.length!=p1.length) throw new Error("Length should be equal!");
 	return [(p0[0]+p1[0]),
 			(p0[1]+p1[1]),
 			(p0[2]+p1[2])];
 }
-function mult(arr,k){
-	ar=[];
-	for(i=0; i<arr.length; i++){
-		a[i]=arr[i]*k;		
-	}
-	return ar;
-}
 function len(vec){
 	return sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
 }
+function ort(vec){
+	if(vec.length!=3) throw new Error("ort: Length should be 3!");
+	ort1= mulc(vec,1/len(vec));
+	return ort1;
+}
+
 function cosvec(vec0,vec1){
 	return ((vec0[0]*vec1[0]+vec0[1]*vec1[1]+vec0[2]*vec1[2])/len(vec0)/len(vec1));
 }
@@ -425,7 +440,7 @@ function trans(poly,dx,dy,dz){
 	return arr;
 }
 function rot(poly,ang){
-	arr=[];
+	var arr=[];
 	for(i=0;i<poly.length;i++){
 		p=poly[i];
 		a=atan2(p[1],p[0]);
@@ -435,26 +450,61 @@ function rot(poly,ang){
 	}
 	return arr;
 }
+
+// тут проблема  с острым углом
 function contract(poly,w) {
 	cont=[];
 	for(i=0; i<poly.length; i++){
-		p0=poly[(i+poly.length-1)%poly.length];
-		p1=poly[i%poly.length];
+		p0=poly[(i-1 +poly.length)%poly.length];
+		p1=poly[(i+0)%poly.length];
 		p2=poly[(i+1)%poly.length];
-		vec10=sub(p0,p1);
-		vec12=sub(p2,p1);
+		vec10=ort(sub(p0,p1));
+		vec12=ort(sub(p2,p1));
 		vec=add(vec10,vec12);
+		a=angle(vec10,vec);
 		l=len(vec);
-		vec=mult(vec,w/l);
-		//cont[i]=add(p0,vec);
-		cont[i]=poly[i];
+		if(sin(a)==0) throw new Error("Zero!");
+		vec=mulc(vec,w/l/sin(a));
+		//model.push(vector(poly[i],vec,0.1));
+		cont[i]=add(poly[i],vec);
 	}
 	return cont;
 }
 
-function trinagulate(poly){
+function solid1(tri){
 	
-	
+	var polygons=[];
+	for(i=0;i<tri.length;i++){
+		var verts=[];
+		var tr=tri[i];
+		verts[0]=new CSG.Vertex(new CSG.Vector3D(tr[0]));
+		verts[1]=new CSG.Vertex(new CSG.Vector3D(tr[1]));
+		verts[2]=new CSG.Vertex(new CSG.Vector3D(tr[2]));
+		var polygon=new CSG.Polygon(verts);
+		polygons.push(polygon);
+	}
+	return  CSG.fromPolygons(polygons);
+}
+function triangulate(poly){
+	var L=poly.length-1;
+	var R=0;
+	var tri=[];
+	var i=0;
+	while(L-R>1){
+		var distRL=distance(poly[R],poly[L-1]);
+		var distLR=distance(poly[L],poly[R+1]);
+		
+		if (distRL<distLR){
+			tri[i]=[poly[L],poly[R],poly[L-1]];
+			L--;
+		}
+		else {
+			tri[i]=[poly[L],poly[R],poly[R+1]];
+			R++
+		}
+		i++;
+	}
+	return solid1(tri);
 }
 function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	
@@ -503,10 +553,27 @@ function main() {
     ShowPegGrid();
 
 	
-	poly = [ [10,10,0], [-10,10,0], [0,0,0]];
-	return surface(contract(poly,1),true);
+	//poly = [[10,10,0], [-10,10,0], [-10,-10,0],[0,-15,0],[10,0,0],[11,5,0]];
+	poly=[];
+	i=0;
+	R=30;
+	R2=20;
+	for(a =0 ;a<=180; a+=10,i++){
+		poly[i]=[R*cos(a),R*sin(a),a/10];
+	}
+	for(a =180 ;a>=0; a-=10,i++){
+		poly[i]=[R2*cos(a),R2*sin(a),0];
+	}
+	
+	//return surface(poly);
+	//return solid1([[[10,10,0], [-10,10,0], [-10,-10,0]]]);
+	return triangulate(poly);
+	//a=mulc(poly,2);
+	
+	model.push(surface(poly,true));
+	//model.push(surface(contract(poly,1),true));
 
-	return contract(poly,3);
+	return model;
 	
 //	return CAG.fromPoints(poly);
 //	return CAG.fromPoints(poly);
