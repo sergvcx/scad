@@ -397,7 +397,7 @@ function sergoeder(poly0,poly1,autoAlign=false){
 	centre1=figureCentre(poly1);
 	centre0=figureCentre(poly0);
 	norm = sub(centre1,centre0);
-	anchor=[0,0,0];
+	anchor=[0,0,50];
     //while((i0<=lastPair[0]) || (i1<=lastPair[1])){
 	
 	
@@ -419,15 +419,30 @@ function sergoeder(poly0,poly1,autoAlign=false){
 		midOrtA011=ort(vec(midLineA011));
 		//dirVA=ort(sub(midOrtA011,midOrtV001));
 		//dirAV=ort(sub(midOrtV011,midOrtA001));
-		dirVA=ort(sub(midOrtA001,lastMidOrt));
-		dirAV=ort(sub(midOrtV001,lastMidOrt));
+		//dirVA=ort(sub(midOrtA001,lastMidOrt));
+		//dirAV=ort(sub(midOrtV001,lastMidOrt));
+		
+		
 		dirVAo=sub(anchor,midLineV001[1]);
 		dirAVo=sub(anchor,midLineA001[1]);
-		cosAVo=cosvec(dirAVo,dirAV);
-		cosVAo=cosvec(dirVAo,dirVA);
+		
+		dirVo=sub(anchor,centre(midLineV001[0],midLineV001[1]));
+		dirAo=sub(anchor,centre(midLineA001[0],midLineA001[1]));
+		
+		//cosAVo=cosvec(dirAVo,dirAV);
+		//cosVAo=cosvec(dirVAo,dirVA);
 		
 		norm1=vecMul(vec(midLineV001),vec(midLineA011));
 		norm0=vecMul(vec(midLineA001),vec(midLineV011));
+		
+		normA=vecMul(sub(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]),
+					 sub(poly1[i1%poly1.length],poly0[i0%poly0.length]));
+		normV=vecMul(sub(poly0[i0%poly0.length],poly1[i1%poly1.length]),
+					 sub(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]));
+				
+		
+		cosAo=cosvec(dirAo,normA);
+		cosVo=cosvec(dirVo,normV);
 		
 		var use;
 		//if (cosvec(norm0,norm1)>0){
@@ -445,20 +460,21 @@ function sergoeder(poly0,poly1,autoAlign=false){
 			//if (cosvec(norm1,norm)>0)
 			
 		
-			if (cosAVo<cosVAo){
+			if (cosVo>cosAo){
 				use=1;
-				model.push(line(midLineV001[0],midLineV001[1],0.1,[1,0,0]));
+				//model.push(line(midLineV001[0],midLineV001[1],0.1,[1,0,0]));
 				//dirAVo=sub(anchor,midLineA001[1]);
-				model.push(vector(midLineV001[1],dirVA,0.1,[1,0,0]));
-				lastMidOrt=midOrtV001;
+				model.push(vector(centre(midLineV001[0],midLineV001[1]),normV,0.1,[1,0,0]));
+				//model.push(vector(centre(midLineV001[1],dirVA,0.1,[1,0,0]));
+				//lastMidOrt=midOrtV001;
 		
 			}
 			else {
-				model.push(line(midLineA001[0],midLineA001[1],0.1,[1,1,0]));
-				model.push(vector(midLineA001[1],dirAV,0.1,[1,1,0]));
-				lastMidOrt=midOrtA001;
+				//model.push(line(midLineA001[0],midLineA001[1],0.1,[1,1,0]));
+				//model.push(vector(midLineA001[1],dirAV,0.1,[1,1,0]));
+				//lastMidOrt=midOrtA001;
 			//dirVAo=sub(anchor,midLineV001[1]);
-		
+				model.push(vector(centre(midLineA001[0],midLineA001[1]),normA,0.1,[1,1,0]));
 				use=0;
 			}
 		//}
