@@ -150,6 +150,17 @@ function vector(strt,vec,r,clr=[1,0,0]){
 		).setColor(clr);
 		
 }
+function line(start1,end1,r,clr=[1,0,0]){
+	if (start1.length!=3 || end1.length!=3) throw new Error("Line:Length should be 3!");
+	//if (len(vec)==0) throw new Error("Zero vector");
+	return 	union(
+		cylinder({start: start1, end: end1, r1: r, r2: r, fn: 4}),
+		//cylinder({start: add(start,vec), end: add(start,vec), r1: r+1, r2: 0, fn: 50})
+		sphere(r).translate(end1)
+		).setColor(clr);
+		
+}
+
 //-----------------------------------------
 function surface(poly, clockwise=false){
 	var verts=[];
@@ -286,16 +297,16 @@ function rot(poly,ang){
 
 // тут проблема  с острым углом
 function contract(poly,w) {
-	cont=[];
+	var cont=[];
 	for(i=0; i<poly.length; i++){
-		p0=poly[(i-1 +poly.length)%poly.length];
-		p1=poly[(i+0)%poly.length];
-		p2=poly[(i+1)%poly.length];
-		vec10=ort(sub(p0,p1));
-		vec12=ort(sub(p2,p1));
-		vec=add(vec10,vec12);
-		a=angle(vec10,vec);
-		l=len(vec);
+		var p0=poly[(i-1 +poly.length)%poly.length];
+		var p1=poly[(i+0)%poly.length];
+		var p2=poly[(i+1)%poly.length];
+		var vec10=ort(sub(p0,p1));
+		var vec12=ort(sub(p2,p1));
+		var vec=add(vec10,vec12);
+		var a=angle(vec10,vec);
+		var l=len(vec);
 		if(sin(a)==0) throw new Error("Zero!");
 		vec=mulc(vec,w/l/sin(a));
 		//model.push(vector(poly[i],vec,0.1));
@@ -313,13 +324,14 @@ function createPolygonsFromTriangles(tri){
 		verts[0]=new CSG.Vertex(new CSG.Vector3D(tr[0]));
 		verts[1]=new CSG.Vertex(new CSG.Vector3D(tr[1]));
 		verts[2]=new CSG.Vertex(new CSG.Vector3D(tr[2]));
-		var polygon=new CSG.Polygon(verts);
-		polygons.push(polygon);
+		//var polygon=new CSG.Polygon(verts);
+		//polygons.push(polygon);
+		polygons[i]=new CSG.Polygon(verts);
 	}
 	return polygons;
 	//return  CSG.fromPolygons(polygons);
 }
-function triangulate(poly,revert){
+function triangulate(poly,revert=false){
 	var L=poly.length-1;
 	var R=0;
 	var triangles=[];
@@ -329,17 +341,17 @@ function triangulate(poly,revert){
 		var distLR=distance(poly[L],poly[R+1]);
 		
 		if (distRL<distLR){
-			if (revert)
+			if (!revert)
 				triangles[i]=[poly[L],poly[R],poly[L-1]];
 			else 
 				triangles[i]=[poly[L],poly[L-1],poly[R]];
 			L--;
 		}
 		else {
-			if (revert)
+			if (!revert)
 				triangles[i]=[poly[L],poly[R],poly[R+1]];
 			else 
-				triangles[i]=[poly[L],poly[R],poly[R+1]];
+				triangles[i]=[poly[L],poly[R+1],poly[R]];
 			R++
 		}
 		i++;
@@ -348,7 +360,7 @@ function triangulate(poly,revert){
 }
 
 function createPolygonsFromPoints(points,revert){
-	triangles=triangulate(points);
+	triangles=triangulate(points,revert);
 	return createPolygonsFromTriangles(triangles);
 }
 
@@ -356,25 +368,15 @@ function createPolygonsFromPoints(points,revert){
 function sergoeder(poly0,poly1,autoAlign=false){
     var polygons = [];
     if (poly0.length>=3){
-        //var verts0=[];
-        //for(i=0;i<poly0.length;i++){
-        //    verts0[i]=new CSG.Vertex(new CSG.Vector3D(poly0[poly0.length-i-1]));
-		//	//verts0[i]=new CSG.Vertex(new CSG.Vector3D(poly0[i]));
-        //}
-        //polygon0=new CSG.Polygon(verts0);
-        //polygons.push(polygon0);
-		//polygons.push(createPolygonsFromPoints(poly0));
+		polygons=createPolygonsFromPoints(poly0,true);
     }
-   
+    
     if (poly1.length>=3){
-        var verts1=[];
-        for(i=0; i<poly1.length;i++){
-            verts1[i]=new CSG.Vertex(new CSG.Vector3D(poly1[i]));
-        }
-        polygon1=new CSG.Polygon(verts1);
-        polygons.push(polygon1);
+		hiPolygons=createPolygonsFromPoints(poly1,false);
+		polygons=polygons.concat(hiPolygons);
     }
-
+	
+	
 	var firstPair=[0,0];
 	var lastPair=[poly0.length-1,poly1.length-1];
 	
@@ -395,10 +397,11 @@ function sergoeder(poly0,poly1,autoAlign=false){
 	centre1=figureCentre(poly1);
 	centre0=figureCentre(poly0);
 	norm = sub(centre1,centre0);
-	//model.push(vector(centre1,norm,1));
-	//model.push(vector(lastMidLine[0],vec(lastMidLine),0.4));
-    while((i0<=lastPair[0]) || (i1<=lastPair[1])){
-	//for(k=0; k<14;k++){
+	anchor=[0,0,0];
+    //while((i0<=lastPair[0]) || (i1<=lastPair[1])){
+	
+	lastMidOrt=ort(vec(middleLine(poly1[(i1-1+poly1.length)%poly1.length],poly0[(i0-1+poly0.length)%poly0.length],poly1[(i1)%poly1.length])));
+	for(k=0; k<8;k++){
 		dist1=distance(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
 		dist0=distance(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
 		midLineV001=middleLine(poly1[i1%poly1.length],poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
@@ -406,23 +409,69 @@ function sergoeder(poly0,poly1,autoAlign=false){
 		midLineV011=middleLine(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length],poly1[(i1+1)%poly1.length]);
 		midLineA011=middleLine(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length],poly0[(i0+1)%poly0.length]);
 
+		//model.push(line(midLineV001[0],midLineV001[1],0.1,[1,0,0]));
+		//model.push(line(midLineA001[0],midLineA001[1],0.1,[1,1,0]));
+		
+		midOrtV001=ort(vec(midLineV001));
+		midOrtA001=ort(vec(midLineA001));
+		midOrtV011=ort(vec(midLineV011));
+		midOrtA011=ort(vec(midLineA011));
+		//dirVA=ort(sub(midOrtA011,midOrtV001));
+		//dirAV=ort(sub(midOrtV011,midOrtA001));
+		dirVA=ort(sub(midOrtA001,lastMidOrt));
+		dirAV=ort(sub(midOrtV001,lastMidOrt));
+		dirVAo=sub(anchor,midLineV001[1]);
+		dirAVo=sub(anchor,midLineA001[1]);
+		cosAVo=cosvec(dirAVo,dirAV);
+		cosVAo=cosvec(dirVAo,dirVA);
+		
 		norm1=vecMul(vec(midLineV001),vec(midLineA011));
 		norm0=vecMul(vec(midLineA001),vec(midLineV011));
-		var use;
-		if (cosvec(norm0,norm1)>0){
-			if (dist1<dist0)
-				use=1;
-			else 
-				use=0;
-		} 
-		else {
-			if (cosvec(norm1,norm)>0)
-				use=1;
-			else 
-				use=0;
-		}
 		
-		if ( (use==1) && (i1<=lastPair[1])){
+		var use;
+		//if (cosvec(norm0,norm1)>0){
+		//	//model.push(vector
+		//	if (dist1<dist0){
+		//		use=1;
+		//		model.push(vector(midLineV001[0],midLineV001[1],0.1));
+		//	}
+		//	else {
+		//		use=0;
+		//		model.push(vector(midLineA001[0],midLineA001[1],0.1));
+		//	}
+		//} 
+		//else {
+			//if (cosvec(norm1,norm)>0)
+			
+		
+			if (cosAVo<cosVAo){
+				use=1;
+				model.push(line(midLineV001[0],midLineV001[1],0.1,[1,0,0]));
+				//dirAVo=sub(anchor,midLineA001[1]);
+				model.push(vector(midLineV001[1],dirVA,0.1,[1,0,0]));
+				lastMidOrt=midOrtV001;
+		
+			}
+			else {
+				model.push(line(midLineA001[0],midLineA001[1],0.1,[1,1,0]));
+				model.push(vector(midLineA001[1],dirAV,0.1,[1,1,0]));
+				lastMidOrt=midOrtA001;
+			//dirVAo=sub(anchor,midLineV001[1]);
+		
+				use=0;
+			}
+		//}
+		
+		//if (cosAVo>cosVAo)
+		//		use=0;
+		//	else 
+		//		use=1;
+		
+		
+		
+		
+		//if ( (use==1) && (i1<=lastPair[1])){
+		if ( use==1){
             var verts=new Array;
             verts[0]=new CSG.Vertex(new CSG.Vector3D(poly0[i0%poly0.length]));
             verts[1]=new CSG.Vertex(new CSG.Vector3D(poly1[(i1+1)%poly1.length]));
@@ -431,7 +480,6 @@ function sergoeder(poly0,poly1,autoAlign=false){
             polygons.push(polygon);
 			lastMidLine=middleLine(poly1[i1%poly1.length],poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
             i1++;
-            continue;
         }
         //if ((dist0<=dist1) && (i1<=lastPair[1]+1) && (i0<=lastPair[0]))
 		else
@@ -444,10 +492,7 @@ function sergoeder(poly0,poly1,autoAlign=false){
             polygons.push(polygon);
 			lastMidLine=middleLine(poly0[i0%poly0.length],poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
             i0++;
-            continue;
         }
-        
-        
     }
     solid = CSG.fromPolygons(polygons);
     return solid;
@@ -466,43 +511,25 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	polyOutHi=trans(polyOutHi,rodPos[0],rodPos[1],0);
 	polyOutLo=[];
 	var i=0;
-	for(a=ang[0];a<=ang[1];a+=5,i++){
+	for(a=ang[0];a<=ang[1];a+=10,i++){
 		polyOutLo[i]=[(R)*cos(a),(R)*sin(a),0];
 	}
-	//polyOutLo[i++]=[20,0,0];
-	//polyOutLo[i++]=[0,0,0];
 	
-	for(a=ang[1];a>=ang[0];a-=5,i++){
-		polyOutLo[i]=[(R-borderW)*cos(a),(R-borderW)*sin(a),0];
-	}
-	
-	return CSG.fromPolygons(createPolygonsFromPoints(polyOutLo),true);
-	
-	//polyInHi=[polyOutHi[3],polyOutHi[2],[0,0,h]];
-	//polyInLo=[];
-	//i=0;
-	//for(a=ang[0];a<acos(21/(R-borderW));a+=1,i++){
-	
-	/*
-	polyInHi=[polyOutHi[3],polyOutHi[2],[0,0,h]];
 	polyInLo=[];
 	i=0;
-	//for(a=ang[0];a<acos(21/(R-borderW));a+=1,i++){
-	for(a=ang[0];a<ang[1]+1;a+=1,i++){
+	for(a=ang[0];a<=ang[1];a+=10,i++){
 		polyInLo[i]=[(R-borderW)*cos(a),(R-borderW)*sin(a),0];
-	}*/
-	//polyInLo[i]=[21,21,0];
-	//i++;
-	polyInLo[i]=[0,0,0];
-	//i++;
-	
-	
-	//return difference(){
-	//return 	sergoeder(polyOutLo,polyOutHi,true);
-	//return 	sergoeder(polyOutLo,polyOutHi,true);
+	}
+	polyInHi=[sub(polyOutHi[2],[0,0,5]),[0,0,h-5],sub(polyOutHi[3],[0,0,5]),];
+	//for(a=ang[1];a>=ang[0];a-=5,i++){
+	//	polyOutLo[i]=[(R-borderW)*cos(a),(R-borderW)*sin(a),0];
+	//}
+
+	//polyInLo=contract(polyOutLo,1);
+	//polyInHi=contract(polyOutHi,2);
 	return	difference(
 		sergoeder(polyOutLo,polyOutHi,true)
-		//sergoeder(polyInLo,polyInHi,false)
+		//sergoeder(polyInLo,polyInHi,true)
 	);
 	//};
 }
@@ -513,17 +540,19 @@ function main() {
 
 	
 	//poly = [[10,10,0], [-10,10,0], [-10,-10,0],[0,-15,0],[10,0,0],[11,5,0]];
-	poly=[];
-	i=0;
-	R=30;
-	R2=20;
-	for(a =0 ;a<=180; a+=10,i++){
-		poly[i]=[R*cos(a),R*sin(a),a/10];
-	}
-	for(a =180 ;a>=0; a-=10,i++){
-		poly[i]=[R2*cos(a),R2*sin(a),0];
-	}
-	
+	//poly=[];
+	//i=0;
+	//R=30;
+	//R2=20;
+	//for(a =0 ;a<=180; a+=10,i++){
+	//	poly[i]=[R*cos(a),R*sin(a),a/10];
+	//}
+	//for(a =180 ;a>=0; a-=10,i++){
+	//	poly[i]=[R2*cos(a),R2*sin(a),0];
+	//}
+	//
+	//polygons=createPolygonsFromPoints(poly,false);
+	//model.push(  CSG.fromPolygons(polygons));//createPolygonsFromPoints(poly))); 
 	//model.push(  CSG.fromPolygons(createPolygonsFromPoints(poly))); 
 	//return model;
 	//return surface(poly);
@@ -579,7 +608,8 @@ function main() {
 	//model.push(sergoeder(poly0,poly1,false));
 	//model.push(sergoeder(polyIn0,polyIn1,false));
 	
-	model.push( tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]));
+	//model.push( tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]));
+	model.push( tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]));
 	return model;
 	nozzIn =tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]);
 	//return nozzIn;
