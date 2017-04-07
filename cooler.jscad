@@ -400,6 +400,7 @@ function sergoeder(poly0,poly1,autoAlign=false){
 	anchor=[0,0,0];
     //while((i0<=lastPair[0]) || (i1<=lastPair[1])){
 	
+	
 	lastMidOrt=ort(vec(middleLine(poly1[(i1-1+poly1.length)%poly1.length],poly0[(i0-1+poly0.length)%poly0.length],poly1[(i1)%poly1.length])));
 	for(k=0; k<8;k++){
 		dist1=distance(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
