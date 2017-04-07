@@ -364,6 +364,18 @@ function createPolygonsFromPoints(points,revert){
 	return createPolygonsFromTriangles(triangles);
 }
 
+function volume(A,B,C,X){
+	var AB=distance(A,B);
+	var BC=distance(B,C);
+	var AC=distance(A,C);
+	var norm=ort(vecMul(sub(B,A),sub(C,A)));
+	var normD= -norm[0]*A[0]-norm[1]*A[1]-norm[2]*A[2];	
+	var h = abs(norm[0]*X[0] + norm[1]*X[1]+norm[2]*X[2]+normD)/sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2]);
+	var p = (AB+BC+AC)/2;
+	var S = sqrt(p*(p-AC)*(p-BC)*(p-AB));
+	var V = S*h/3;
+	return V;
+}
 
 function sergoeder(poly0,poly1,autoAlign=false){
     var polygons = [];
@@ -402,9 +414,20 @@ function sergoeder(poly0,poly1,autoAlign=false){
 	
 	
 	lastMidOrt=ort(vec(middleLine(poly1[(i1-1+poly1.length)%poly1.length],poly0[(i0-1+poly0.length)%poly0.length],poly1[(i1)%poly1.length])));
-	for(k=0; k<8;k++){
+	for(k=0; k<1;k++){
 		dist1=distance(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
 		dist0=distance(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
+		
+		//AB
+		//CD
+		AB=distance(poly1[i1%poly1.length],poly1[(i1+1)%poly1.length]);
+		AD=distance(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
+		AC=distance(poly1[i1%poly1.length],poly0[(i0+0)%poly0.length]);
+		CB=distance(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
+		CD=distance(poly0[i0%poly0.length],poly0[(i0+1)%poly0.length]);
+		BD=distance(poly1[(i1+1)%poly1.length],poly0[(i0+1)%poly0.length]);
+		BC=CB;
+		
 		midLineV001=middleLine(poly1[i1%poly1.length],poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]);
 		midLineA001=middleLine(poly0[i0%poly0.length],poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]);
 		midLineV011=middleLine(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length],poly1[(i1+1)%poly1.length]);
@@ -426,23 +449,43 @@ function sergoeder(poly0,poly1,autoAlign=false){
 		dirVAo=sub(anchor,midLineV001[1]);
 		dirAVo=sub(anchor,midLineA001[1]);
 		
-		dirVo=sub(anchor,centre(midLineV001[0],midLineV001[1]));
-		dirAo=sub(anchor,centre(midLineA001[0],midLineA001[1]));
+		centreV=centre(midLineV001[0],midLineV001[1]);
+		centreA=centre(midLineA001[0],midLineA001[1]);
+		//dirVo=sub(anchor,);
+		//dirAo=sub(anchor,centre(midLineA001[0],midLineA001[1]));
+		
+		//A(x - x0) + B(y - y0) + C(z - z0) = 0
+		//A x + B y + C z + D = 0
 		
 		//cosAVo=cosvec(dirAVo,dirAV);
 		//cosVAo=cosvec(dirVAo,dirVA);
 		
-		norm1=vecMul(vec(midLineV001),vec(midLineA011));
-		norm0=vecMul(vec(midLineA001),vec(midLineV011));
+		//norm1=vecMul(vec(midLineV001),vec(midLineA011));
+		//norm0=vecMul(vec(midLineA001),vec(midLineV011));
 		
 		normA=vecMul(sub(poly1[i1%poly1.length],poly0[(i0+1)%poly0.length]),
 					 sub(poly1[i1%poly1.length],poly0[i0%poly0.length]));
 		normV=vecMul(sub(poly0[i0%poly0.length],poly1[i1%poly1.length]),
 					 sub(poly0[i0%poly0.length],poly1[(i1+1)%poly1.length]));
-				
 		
-		cosAo=cosvec(dirAo,normA);
-		cosVo=cosvec(dirVo,normV);
+		DA= -normA[0]*centreA[0]-normA[1]*centreA[1]-normA[2]*centreA[2];
+		DV= -normV[0]*centreV[0]-normV[1]*centreV[1]-normV[2]*centreV[2];
+		
+		hAo = 	abs(normA[0]*anchor[0] + normA[1]*anchor[1]+normA[2]*anchor[2]+DA)/sqrt(normA[0]*normA[0]+normA[1]*normA[1]+normA[2]*normA[2]);
+		hVo = 	abs(normV[0]*anchor[0] + normV[1]*anchor[1]+normV[2]*anchor[2]+DV)/sqrt(normV[0]*normV[0]+normV[1]*normV[1]+normV[2]*normV[2]);
+		
+		//AB
+		//CD
+
+		pA = (AC+CD+AD)/2;
+		pV = (AB+BC+AC)/2;
+		sA = sqrt(pA*(pA-AC)+pA*(pA-CD)+pA*(pA-AD));
+		sV = sqrt(pV*(pV-AB)+pV*(pV-BC)+pV*(pV-AC));
+		vAo= sA*hAo/3;
+		vVo= sV*hVo/3;
+		
+		//cosAo=cosvec(dirAo,normA);
+		//cosVo=cosvec(dirVo,normV);
 		
 		var use;
 		//if (cosvec(norm0,norm1)>0){
@@ -460,7 +503,7 @@ function sergoeder(poly0,poly1,autoAlign=false){
 			//if (cosvec(norm1,norm)>0)
 			
 		
-			if (cosVo>cosAo){
+			if (vVo>vAo){
 				use=1;
 				//model.push(line(midLineV001[0],midLineV001[1],0.1,[1,0,0]));
 				//dirAVo=sub(anchor,midLineA001[1]);
@@ -557,6 +600,8 @@ function main() {
 
 	
 	//poly = [[10,10,0], [-10,10,0], [-10,-10,0],[0,-15,0],[10,0,0],[11,5,0]];
+	vol = volume([0,0,0], [0,1,0], [1,0,0],[0,0,2]);
+	return vector([0,0,0],[0,vol,0],0.1);
 	//poly=[];
 	//i=0;
 	//R=30;
