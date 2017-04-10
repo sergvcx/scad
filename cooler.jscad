@@ -748,9 +748,10 @@ function wall2bottomtop(triangles){
 	var b=0;
 	var tri=triangles[0];
 	var c=centre(tri);
-	bottom[0]=1;
-	top[0]=1;
-	if (tri[1][2]>10){
+	//bottom[0]=[0,0,0];
+	//top[0]=1;
+	var c=centre3(tri[0],tri[1],tri[2]);
+	if (tri[1][2]>c[2]){
 		top[t++]=c[2]; 	// A
 		bottom[b++]=tri[2];
 		bottom[b++]=tri[0];
@@ -775,9 +776,12 @@ function wall2bottomtop(triangles){
 	return [bottom,top];
 }
 function solid_wall(poly0,poly1,X,w){
+	if (poly1.length!=4) throw new Error ("Error");
 	outWall    =triangulate_wall(poly0,poly1,X);
-	outWallLoHi=split_wall(outWall,0.51);
-	outPolyBTLo=wall2bottomtop(outWallLoHi[0]);
+	outWallLoHi=split_wall(outWall,0.71);
+	outPolyBTLo=wall2bottomtop(outWallLoHi[1]);
+	//if (outPolyBTLo[1].length!=4) throw new Error ("Error!!!");
+	
 	inPoly0    =contract(poly0,w);
 	inPolyMid  =contract(outPolyBTLo[1],w);
 	inPoly1    =contract(poly1,w);
@@ -794,14 +798,19 @@ function solid_wall(poly0,poly1,X,w){
 	
 	return union(
 		difference(
-			wall2solid(outWallLoHi[1])
+			//sergoeder(outPolyMid,poly1,X)
+			//wall2solid(inWallLoHi[1])
 			//sergoeder(inPolyMid,inPoly1,X1)
-		).translate([0,0,1]),
+			sergoeder(outPolyBTLo[0],outPolyBTLo[1],X1),
+			
+			sergoeder(inPolyMid,outPolyBTLo[1],X1)
+			//sergoeder(inPolyMid,inPoly1,X1)
+		).translate([0,0,10])
 	
-		difference(
-			wall2solid(outWallLoHi[0]),
-			sergoeder(inPoly0,inPolyMid,X0)
-		)
+		//difference(
+		//	wall2solid(outWallLoHi[0]),
+		//	sergoeder(inPoly0,inPolyMid,X0)
+		//)
 	);
 	model.push(vector([0,0,0],X1,0.1,[1,0,1]));
 	model.push();
