@@ -706,7 +706,7 @@ function wall2solid(wall){
     solid = CSG.fromPolygons(polygons);
     return solid;
 }
-function split_wall(trigs){
+function split_wall(trigs,k=0.5){
 	var hi=[];
 	var lo=[];
 	var l=0;
@@ -714,7 +714,11 @@ function split_wall(trigs){
 	for(i=0;i<trigs.length; i++){
 		var t=trigs[i];
 		var mid=middleLine(t[0],t[1],t[2]);
+		
 		if (t[1][2]>(mid[0][2]+mid[1][2])/2){
+			var mid=[add(t[1],mulc(sub(t[0],t[1]),(1-k))),
+					 add(t[1],mulc(sub(t[2],t[1]),(1-k)))];
+
 			//       t[1]
 			//   mid[1] mid[0]
 			//  t[2]      t[0]
@@ -724,6 +728,9 @@ function split_wall(trigs){
         
 		}
 		else {
+			var mid=[add(t[1],mulc(sub(t[0],t[1]),(k))),
+					 add(t[1],mulc(sub(t[2],t[1]),(k)))];
+
 			//  t[0]        t[2]
 			//   mid[0]  mid[1]]
 			//         t[1] 
@@ -769,7 +776,7 @@ function wall2bottomtop(triangles){
 }
 function solid_wall(poly0,poly1,X,w){
 	outWall    =triangulate_wall(poly0,poly1,X);
-	outWallLoHi=split_wall(outWall);
+	outWallLoHi=split_wall(outWall,0.51);
 	outPolyBTLo=wall2bottomtop(outWallLoHi[0]);
 	inPoly0    =contract(poly0,w);
 	inPolyMid  =contract(outPolyBTLo[1],w);
@@ -787,8 +794,8 @@ function solid_wall(poly0,poly1,X,w){
 	
 	return union(
 		difference(
-			wall2solid(outWallLoHi[1]),
-			sergoeder(inPolyMid,inPoly1,X1)
+			wall2solid(outWallLoHi[1])
+			//sergoeder(inPolyMid,inPoly1,X1)
 		).translate([0,0,1]),
 	
 		difference(
