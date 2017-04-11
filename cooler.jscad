@@ -862,13 +862,13 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 
 	var polyOutLo=[];
 	var i=0;
-	for(a=ang[0];a<=ang[1]+10;a+=5,i++){
+	for(a=ang[0];a<=ang[1]+20;a+=5,i++){
 		polyOutLo[i]=[(R)*cos(a),(R)*sin(a),0];
 	}
 	for(a=ang[1];a>=ang[0];a-=5,i++){
 		polyOutLo[i]=[(R-borderW)*cos(a),(R-borderW)*sin(a),0];
 	}
-	return solid_wall(polyOutLo,polyOutHi,X,1.1);
+	return solid_wall(polyOutLo,polyOutHi,X,w);
 }
 
 
