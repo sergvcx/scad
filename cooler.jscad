@@ -1,7 +1,6 @@
 var model = new Array();
 
 function mulc(vec,k){
-	//var arr=[];
 	var p=[];
 	//var z=[];
 	//for(i=0; i<poly.length; i++){
@@ -844,10 +843,7 @@ function solid_wall(poly0,poly1,X,w){
 function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	r=19;
 	a=-45;
-	//X= [R23,-15,10];
 	X= [r*cos(a),r*sin(a),10];
-
-	
 	polyOutHi=[	
 				[0,0,h],
 				[0,rodSize[1],h],
@@ -868,7 +864,11 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	for(a=ang[1];a>=ang[0];a-=5,i++){
 		polyOutLo[i]=[(R-borderW)*cos(a),(R-borderW)*sin(a),0];
 	}
-	return solid_wall(polyOutLo,polyOutHi,X,w);
+	polyHolerLo=trans(polyOutLo,0,0,-2);
+	
+	holer= sergoeder(contract(polyHolerLo,w),contract(polyOutLo,w),centre(polyHolerLo));
+	//return holer;
+	return [solid_wall(polyOutLo,polyOutHi,X,w),holer];
 }
 
 
@@ -904,74 +904,28 @@ function main() {
 	//model.push(
 	//nozzOut=tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
 	//!nozzOut=tube([rodx,rody],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
-	nozzOut=tube([rodx,rody],[17,-17,0],[-70,20],nozzleR,borderW,20,1,false).translate([0,0,0]);
-	 return nozzOut;
+	nozzOut=tube([rodx,rody],[17,-17,0],[-70,20],nozzleR,borderW,20,1,false).translate([0,0,8]);
+	 //return nozzOut;
 	//nozzIn =tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]);
 	//return model;
 	//return nozzIn;
 	//nozzOut=tube([rodx,rody],[17,-17,0],[-70-asin(1/nozzleR),20+asin(1/nozzleR)],nozzleR,borderW,20,1,false).translate([0,0,8]);
 	nozz=difference(
 			union(
-				nozzOut,
-				nozzOut.mirroredX(),
-				coolerRing(coolerR,nozzleR,4,borderW)
+				nozzOut[0],
+				nozzOut[0].mirroredX(),
+				difference(
+				coolerRing(coolerR,nozzleR,4,borderW),
+				nozzOut[1])
 			)
 			//nozzIn,
 			//nozzIn.mirroredX()
 		);
 	model.push(nozz);
-	//model.push(nozz.mirroredX());
-	//return model;
 	
 	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,28]));
 	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,28]).mirroredX());
     
-   // model.push(extruder());
-   // model.push(sergoeder(lo4,hi5));
-    
-
-    return model;
-
-    
-    
-
-
-
-    nozzleOut= roundBox(nozzleR,nozzleH,round,true,false);
-    nozzleIn = roundBox(nozzleR-1,nozzleH-2,round-1).translate([0,0,1]);
-
-   
-    nozzleCube = cube({size:nozzleR0*2,center:[true,true,false]});
-    border = roundRectTor(41/2,nozzleR,4,round).translate([0,0,4]);
-    nozzle= difference(union(nozzleOut,border),
-                star,
-                nozzleCube,
-                roundRectTor(nozzleR-5,nozzleR-1,6,round-1,false).translate([0,0,1]),// emptity
-                roundRectTor(42/2,nozzleR-1,3,round-1).translate([0,0,4]) );
-
-
-    model.push(nozzle);
-    return model;
+	return model;
 
 }
-/*
-var lo2=[[0,0,0],[dx0,2,0]];
-    var lo3=[[0,0,0],[dx0,2,0],[dx0,dy0,0]];
-    var lo4=[[0,0,0],[dx0,2,0],[dx0,dy0,0],[0,dy0,0]];
-    var lo5=[[0,0,0],[dx0,2,0],[dx0,dy0,0],[0,dy0,0],[-5,5,0]];
-    //var hi=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[2,dy1,h]];
-    var hi5=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[0,dy1,h],[-5,5,h]];
-    var hi4=[[0,0,h],[dx1,0,h],[dx1,dy1,h],[0,dy1,h]];
-    var hi3=[[0,0,h],[dx1,0,h],[dx1,dy1,h]];
-    var hi2=[[0,0,h],[dx1,0,h]];
-    var tri=[[0,0,h],[dx1,0,h],[dx1,dy1,h]];
-    var circ=[];
-    for(i=0 ;i<15; i++){
-        circ[i]=[10*cos(i*360/15),10*sin(i*360/15),10+i];
-    }
-    var circlo=[];
-    for(i=0 ;i<15; i++){
-        circlo[i]=[10*cos(i*360/15),10*sin(i*360/15),0];
-    }
-	//model.push(star(nozzleR-1,2));
-	*/
