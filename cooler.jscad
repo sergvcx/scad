@@ -363,6 +363,55 @@ function contract(poly,w,r=2) {
 	return cont;
 }
 
+function createPolygonsFromPoints(points,revert){
+	triangles=triangulate(points,revert);
+	return createPolygonsFromTriangles(triangles);
+}
+
+function perimetr3(A,B,C){
+	var AB=distance(A,B);
+	var BC=distance(B,C);
+	var AC=distance(A,C);
+	var p = (AB+BC+AC);
+	return p;
+}
+
+function perimetr(poly){
+	var len=0;
+	for(i=0; i<poly.length-1; i++){
+		len=len+distance(poly[i],poly[i+1]);
+	}
+	return len;
+}
+function area(A,B,C){
+	var AB=distance(A,B);
+	var BC=distance(B,C);
+	var AC=distance(A,C);
+	var p = (AB+BC+AC)/2;
+	var S = sqrt(p*(p-AC)*(p-BC)*(p-AB));
+	return S;
+}
+function volume(A,B,C,X){
+	var AB=distance(A,B);
+	var BC=distance(B,C);
+	var AC=distance(A,C);
+	var norm=ort(vecMul(sub(B,A),sub(C,A)));
+	var dirx=sub(X,centre3(A,B,C));
+	var normD= -norm[0]*A[0]-norm[1]*A[1]-norm[2]*A[2];	
+	//var h = abs(norm[0]*X[0] + norm[1]*X[1]+norm[2]*X[2]+normD)/sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2]);
+	var h = (norm[0]*X[0] + norm[1]*X[1]+norm[2]*X[2]+normD)/sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2]);
+	var p = (AB+BC+AC)/2;
+	var S = sqrt(p*(p-AC)*(p-BC)*(p-AB));
+	var V = S*h/3;
+	c=cosvec(norm,dirx);
+	return V;
+}
+function is_inside_angle(BA,BC,BX){
+	var abx=angle(BA,BX);
+	var cbx=angle(BC,BX);
+	var abc=angle(BA,BC);
+	return (abx+cbx<=abc);
+}
 function createPolygonsFromTriangles(tri){
 	var i;
 	var polygons=[];
@@ -403,7 +452,8 @@ function triangulate(poly,revert=false){
 	
 	//model.push(vector(poly[minIdx],[0,0,1],0.1,[1,0,0]));
 		
-	while(abs(L-R)>=2){
+	//while(abs(L-R)>=2){
+	for(j=0;j<poly.length-3;j++){
 		var LL=(L-1+poly.length)%poly.length;
 		var RR=(R+1)%poly.length;
 		angleL = angle3(poly[LL],poly[L],poly[R]);
@@ -456,57 +506,6 @@ function triangulate(poly,revert=false){
 	return triangles;
 }
 
-function createPolygonsFromPoints(points,revert){
-	triangles=triangulate(points,revert);
-	return createPolygonsFromTriangles(triangles);
-}
-
-function perimetr3(A,B,C){
-	var AB=distance(A,B);
-	var BC=distance(B,C);
-	var AC=distance(A,C);
-	var p = (AB+BC+AC);
-	return p;
-}
-
-function perimetr(poly){
-	var len=0;
-	for(i=0; i<poly.length-1; i++){
-		len=len+distance(poly[i],poly[i+1]);
-	}
-	return len;
-}
-function area(A,B,C){
-	var AB=distance(A,B);
-	var BC=distance(B,C);
-	var AC=distance(A,C);
-	var p = (AB+BC+AC)/2;
-	var S = sqrt(p*(p-AC)*(p-BC)*(p-AB));
-	return S;
-}
-function volume(A,B,C,X){
-	var AB=distance(A,B);
-	var BC=distance(B,C);
-	var AC=distance(A,C);
-	var norm=ort(vecMul(sub(B,A),sub(C,A)));
-	var dirx=sub(X,centre3(A,B,C));
-	var normD= -norm[0]*A[0]-norm[1]*A[1]-norm[2]*A[2];	
-	//var h = abs(norm[0]*X[0] + norm[1]*X[1]+norm[2]*X[2]+normD)/sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2]);
-	var h = (norm[0]*X[0] + norm[1]*X[1]+norm[2]*X[2]+normD)/sqrt(norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2]);
-	var p = (AB+BC+AC)/2;
-	var S = sqrt(p*(p-AC)*(p-BC)*(p-AB));
-	var V = S*h/3;
-	c=cosvec(norm,dirx);
-	return V;
-}
-
-
-function is_inside_angle(BA,BC,BX){
-	var abx=angle(BA,BX);
-	var cbx=angle(BC,BX);
-	var abc=angle(BA,BC);
-	return (abx+cbx<=abc);
-}
 function triangulate_wall(poly0,poly1,X){
 	var i0=0;
 	var i1=0;
@@ -818,7 +817,7 @@ function wall2bottomtop(triangles){
 }
 function solid_wall(poly0,poly1,X,w){
 	outWall    =triangulate_wall(poly0,poly1,X);
-	outWallLoHi=split_wall(outWall,0.85);
+	outWallLoHi=split_wall(outWall,0.8);
 	outPolyBTLo=wall2bottomtop(outWallLoHi[0]);
 	inPoly0    =contract(poly0,w);
 	inPolyMid  =contract(outPolyBTLo[1],w);
@@ -832,7 +831,9 @@ function solid_wall(poly0,poly1,X,w){
 	return union(
 		difference(
 			wall2solid(outWallLoHi[1]),
-			sergoeder(inPolyMid,inPoly1,X1)
+			sergoeder(inPolyMid,inPoly1,X1).translate([0,0,0.0])
+			//sergoeder(inPoly0,inPolyMid,X0)
+			
 		).translate([0,0,0]),
 		difference(
 			wall2solid(outWallLoHi[0]),
@@ -875,38 +876,6 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 function main() {
     ShowPegGrid();
 
-	
-	//poly = [[10,10,0], [-10,10,0], [-10,-10,0],[0,-15,0],[10,0,0],[11,5,0]];
-	//vol = volume([0,0,0], [0,1,0], [1,0,0],[0,0,6]);
-	//return vector([0,0,0],[0,vol,0],0.1);
-	//poly=[];
-	//i=0;
-	//R=30;
-	//R2=20;
-	//for(a =0 ;a<=180; a+=10,i++){
-	//	poly[i]=[R*cos(a),R*sin(a),a/10];
-	//}
-	//for(a =180 ;a>=0; a-=10,i++){
-	//	poly[i]=[R2*cos(a),R2*sin(a),0];
-	//}
-	//
-	//polygons=createPolygonsFromPoints(poly,false);
-	//model.push(  CSG.fromPolygons(polygons));//createPolygonsFromPoints(poly))); 
-	//model.push(  CSG.fromPolygons(createPolygonsFromPoints(poly))); 
-	//return model;
-	//return surface(poly);
-	//return solid1([[[10,10,0], [-10,10,0], [-10,-10,0]]]);
-	//return triangulate(poly);
-	//a=mulc(poly,2);
-	
-	//model.push(surface(poly,true));
-	//model.push(surface(contract(poly,1),true));
-
-	//return model;
-	
-//	return CAG.fromPoints(poly);
-//	return CAG.fromPoints(poly);
-	//return path;
 	a = 1, b = 2;
 	var dx0=10;
     var dx1=10;
@@ -931,27 +900,12 @@ function main() {
 	
 	var tubeh=20;
 	
-	//model.push(cube({size:[66,5,1]}).center('x').translate([0,-25,0]));
-//	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,0]));
-//	model.push(rodHi(rodx,rody,rodHi_z,w).translate([rodDx,rodDy,0]).mirroredX());
-  //return model;	
-	
-	
-	//	poly0[i]=[-11,nozzleR/2-4,0];
-	
-	
-	//var shape1 = CAG.fromPoints(poly0); 
-	//var shape2 = CAG.fromPoints(poly1); 
-	//var shapeIn1 = CAG.fromPoints(polyIn0); 
-	//return shapeIn1;
-	//model.push(sergoeder(poly0,poly1,false));
-	//model.push(sergoeder(polyIn0,polyIn1,false));
-	
 	//model.push( tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]));
 	//model.push(
 	//nozzOut=tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
-	nozzOut=tube([rodx,rody],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
-	
+	//!nozzOut=tube([rodx,rody],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
+	nozzOut=tube([rodx,rody],[17,-17,0],[-70,20],nozzleR,borderW,20,1,false).translate([0,0,0]);
+	 return nozzOut;
 	//nozzIn =tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]);
 	//return model;
 	//return nozzIn;
