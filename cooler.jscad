@@ -114,6 +114,9 @@ function cosvec(vec0,vec1){
 function angle(vec0,vec1){
 	return acos(cosvec(vec0,vec1));
 }
+function angle3(A,B,C){
+	return angle(sub(A,B),sub(C,B));
+}
 
 function vecMul(vec0,vec1){
 	if(vec0.length!=3 || vec1.length!=3) throw new Error("vecMul:Length should be 3!");
@@ -331,7 +334,7 @@ function rot1(p,ang){
 }
 
 // тут проблема  с острым углом
-function contract(poly,w,r=1) {
+function contract(poly,w,r=2) {
 	var cont=[];
 	var prevPoint=poly[(i-1 +poly.length)%poly.length];
 	j=0;
@@ -361,9 +364,11 @@ function contract(poly,w,r=1) {
 }
 
 function createPolygonsFromTriangles(tri){
-	
+	var i;
 	var polygons=[];
-	for(i=0;i<tri.length;i++){
+	for(i=0;i<tri.length;i++){ // WTH if i<41
+	
+	//for(i=0;i<41;i++){
 		var verts=[];
 		var tr=tri[i];
 		verts[0]=new CSG.Vertex(new CSG.Vector3D(tr[0]));
@@ -377,30 +382,77 @@ function createPolygonsFromTriangles(tri){
 	//return  CSG.fromPolygons(polygons);
 }
 function triangulate(poly,revert=false){
-	var L=poly.length-1;
-	var R=0;
 	var triangles=[];
+	var minAng=angle3(poly[poly.length-1],poly[0],poly[1]);
+	var minIdx=0;
 	var i=0;
-	while(L-R>1){
-		var distRL=distance(poly[R],poly[L-1]);
-		var distLR=distance(poly[L],poly[R+1]);
+	for(i=1;i<poly.length-1;i++){ // !!!
+		ang=angle3(poly[i-1],poly[i],poly[i+1]);
+		if (ang<minAng){
+			minAng=ang;
+			minIdx=i;
+		}
+	}
+	i=0;
+	var L=(minIdx-1+poly.length)%poly.length;
+	var R=(minIdx+1)%poly.length;
+	if (!revert)
+		triangles[i++]=[poly[L],poly[minIdx],poly[R]];
+	else 
+		triangles[i++]=[poly[R],poly[minIdx],poly[L]];
+	
+	//model.push(vector(poly[minIdx],[0,0,1],0.1,[1,0,0]));
 		
-		if (distRL<distLR){
+	while(abs(L-R)>=2){
+		var LL=(L-1+poly.length)%poly.length;
+		var RR=(R+1)%poly.length;
+		angleL = angle3(poly[LL],poly[L],poly[R]);
+		angleR = angle3(poly[L],poly[R],poly[RR]);
+		if (angleL<angleR){
 			if (!revert)
-				triangles[i]=[poly[L],poly[R],poly[L-1]];
+				triangles[i++]=[poly[LL],poly[L],poly[R]];
 			else 
-				triangles[i]=[poly[L],poly[L-1],poly[R]];
-			L--;
+				triangles[i++]=[poly[R],poly[L],poly[LL]];
+			//model.push(line(poly[LL],poly[R],0.1,[1,1,0]));
+			
+			L=(L-1+poly.length)%poly.length;
+			//model.push(vector(poly[L],[0,0,1],0.1,[1,1,0]));
+			
 		}
 		else {
 			if (!revert)
-				triangles[i]=[poly[L],poly[R],poly[R+1]];
+				triangles[i++]=[poly[L],poly[R],poly[RR]];
 			else 
-				triangles[i]=[poly[L],poly[R+1],poly[R]];
-			R++
+				triangles[i++]=[poly[RR],poly[R],poly[L]];
+			//model.push(line(poly[RR],poly[L],0.1,[0,1,0]));
+			//model.push(vector(poly[R],[0,0,1],0.1,[0,1,0]));
+			
+			//model.push(line(poly[RR],poly[L],0.1,[0,1,0]));
+			R=(R+1)%poly.length;
+			//model.push(vector(poly[R],[0,0.5,1],0.1,[0,1,0]));
 		}
-		i++;
 	}
+	
+	//while(L-R>1){
+	//	var distRL=distance(poly[R],poly[L-1]);
+	//	var distLR=distance(poly[L],poly[R+1]);
+	//	
+	//	if (distRL<distLR){
+	//		if (!revert)
+	//			triangles[i]=[poly[L],poly[R],poly[L-1]];
+	//		else 
+	//			triangles[i]=[poly[L],poly[L-1],poly[R]];
+	//		L--;
+	//	}
+	//	else {
+	//		if (!revert)
+	//			triangles[i]=[poly[L],poly[R],poly[R+1]];
+	//		else 
+	//			triangles[i]=[poly[L],poly[R+1],poly[R]];
+	//		R++
+	//	}
+	//	i++;
+	//}
 	return triangles;
 }
 
@@ -462,13 +514,10 @@ function triangulate_wall(poly0,poly1,X){
 	var previ1=999;
 	var wall=[];
 	var i=0;
-	
-	
 	var	nextMove1=[0,0,1];//vecMul(Xa,vecAB);
 	var nextMove0=[0,0,1];//vecMul(Xc,vecCD);
 	var	prevMove1=[0,0,1];//vecMul(Xa,vecAB);
 	var prevMove0=[0,0,1];//vecMul(Xc,vecCD);
-		
 	var i0enabled=true;
 	var i1enabled=true;
 	while(true){
@@ -655,17 +704,15 @@ function triangulate_wall(poly0,poly1,X){
 			i1enabled=true;
 			i0enabled=true;
 		}
-	
-		
     }
 	return wall;
 }
 function sergoeder(poly0,poly1,X){
     var polygons = [];
-    if (poly0.length>=3){
+    if (poly0.length>=3){ // bottom
 		polygons=createPolygonsFromPoints(poly0,true);
     }
-    if (poly1.length>=3){
+    if (poly1.length>=3){ //top
 		hiPolygons=createPolygonsFromPoints(poly1,false);
 		polygons=polygons.concat(hiPolygons);
     }
@@ -686,14 +733,16 @@ function sergoeder(poly0,poly1,X){
 function wall2solid(wall){
 	var polygons = [];
 	var bt=wall2bottomtop(wall);
-	if (bt[0].length>=3){
+	
+	if (bt[0].length>=3){ // bottom
 		polygons=createPolygonsFromPoints(bt[0],true);
     }
-    if (bt[1].length>=3){
+	if (bt[1].length>=3){ // top
 		hiPolygons=createPolygonsFromPoints(bt[1],false);
 		polygons=polygons.concat(hiPolygons);
     }
-	for(i=0; i<wall.length; i++ ){
+	
+    for(i=0; i<wall.length; i++ ){
 		var verts=new Array;
 		var tri=wall[i];
 		//model.push(line(tri[0],tri[1]));
@@ -714,23 +763,20 @@ function split_wall(trigs,k=0.5){
 	for(i=0;i<trigs.length; i++){
 		var t=trigs[i];
 		var mid=middleLine(t[0],t[1],t[2]);
-		
 		if (t[1][2]>(mid[0][2]+mid[1][2])/2){
 			var mid=[add(t[1],mulc(sub(t[0],t[1]),(1-k))),
 					 add(t[1],mulc(sub(t[2],t[1]),(1-k)))];
-
 			//       t[1]
 			//   mid[1] mid[0]
 			//  t[2]      t[0]
 			hi[h++]=[mid[0],t[1],mid[1]];	// A
-			lo[l++]=[mid[1],t[2],mid[0]]; 	//V			
+			lo[l++]=[mid[1],t[2],mid[0]]; 	// V			
 			lo[l++]=[t[0],mid[0],t[2]];		// A
         
 		}
 		else {
 			var mid=[add(t[1],mulc(sub(t[0],t[1]),(k))),
 					 add(t[1],mulc(sub(t[2],t[1]),(k)))];
-
 			//  t[0]        t[2]
 			//   mid[0]  mid[1]]
 			//         t[1] 
@@ -747,25 +793,20 @@ function wall2bottomtop(triangles){
 	var t=0;
 	var b=0;
 	var tri=triangles[0];
-	var c=centre(tri);
-	//bottom[0]=[0,0,0];
-	//top[0]=1;
 	var c=centre3(tri[0],tri[1],tri[2]);
 	if (tri[1][2]>c[2]){
-		top[t++]=c[2]; 	// A
+		top[t++]   =tri[1]; // A
 		bottom[b++]=tri[2];
 		bottom[b++]=tri[0];
 	}
 	else {
-		top[t++]=tri[0];	// V
-		top[t++]=tri[2];	// V
+		top[t++]   =tri[0];	// V
+		top[t++]   =tri[2];	// V
 		bottom[b++]=tri[1];
 	}
 	for (i=1;i<triangles.length;i++){
-	//for (i=1;i<22;i++){
 		tri=triangles[i];
 		c=centre3(tri[0],tri[1],tri[2]);
-		//var cc=centre(tri);
 		if (tri[1][2]>c[2]){
 			if (distance(tri[0],bottom[0])>0.01)
 				bottom[b++]=tri[0]; 	// A
@@ -776,89 +817,28 @@ function wall2bottomtop(triangles){
 	return [bottom,top];
 }
 function solid_wall(poly0,poly1,X,w){
-	if (poly1.length!=4) throw new Error ("Error");
 	outWall    =triangulate_wall(poly0,poly1,X);
-	outWallLoHi=split_wall(outWall,0.71);
-	outPolyBTLo=wall2bottomtop(outWallLoHi[1]);
-	//if (outPolyBTLo[1].length!=4) throw new Error ("Error!!!");
-	
+	outWallLoHi=split_wall(outWall,0.85);
+	outPolyBTLo=wall2bottomtop(outWallLoHi[0]);
 	inPoly0    =contract(poly0,w);
 	inPolyMid  =contract(outPolyBTLo[1],w);
 	inPoly1    =contract(poly1,w);
-	//for(i=0; i<inPoly1.length; i++){
-		//model.push(vector([0,0,0],inPoly1[i]));
-		//model.push(vector([0,0,0],poly1[i],0.1,[1,1,0]));
-	//}
-	//return wall2solid(outWallLoHi[1]);
-	//return wall2solid(outWallLoHi[0]);
-	X=[12,-9,10];
+
+	X =[12,-9,10];
 	X0=rot1([20.1,0,0],-30);
 	X1=rot1([20.1,0,20],-30);
 	//model.push(vector([0,0,0],X,0.1,[0,0,1]));
 	
 	return union(
 		difference(
-			//sergoeder(outPolyMid,poly1,X)
-			//wall2solid(inWallLoHi[1])
-			//sergoeder(inPolyMid,inPoly1,X1)
-			sergoeder(outPolyBTLo[0],outPolyBTLo[1],X1),
-			
-			sergoeder(inPolyMid,outPolyBTLo[1],X1)
-			//sergoeder(inPolyMid,inPoly1,X1)
-		).translate([0,0,10])
-	
-		//difference(
-		//	wall2solid(outWallLoHi[0]),
-		//	sergoeder(inPoly0,inPolyMid,X0)
-		//)
+			wall2solid(outWallLoHi[1]),
+			sergoeder(inPolyMid,inPoly1,X1)
+		).translate([0,0,0]),
+		difference(
+			wall2solid(outWallLoHi[0]),
+			sergoeder(inPoly0,inPolyMid,X0)
+		)
 	);
-	model.push(vector([0,0,0],X1,0.1,[1,0,1]));
-	model.push();
-	return sergoeder(inPolyMid,inPoly1,X1).translate([0,0,1]);
-	
-	//c0=centre(inPoly0);//X=[20,-10,0];
-	//cm=centre(inPolyMid);//X=[20,-10,0];
-	//c1=centre(inPoly1);//X=[20,-10,0];	
-	//X0=rot1([25.1,0,0],-30);
-	X0=rot1([20.2,0,8],-35);
-	X1=rot1([20,0,15],-32);
-	X1=rot1([23,0,10],-32);
-	
-
-	//X0=mulc(X0,0.9);
-	//X0=[20,0,10];
-	//X1=mulc(X1,1);
-	//X1=[20,-10,20];
-	//X1=[0,0,1];
-	
-	//X[2]=-30;
-	model.push(vector([0,0,0],X,0.1,[1,0,1]));
-
-	//model.push(vector([0,0,0],X1));
-	return sergoeder(poly0,poly1,X);
-	//return model;
-	polyInLo=contract(poly0,1);
-	polyInHi=contract(poly1,0.5);
-//	return difference(sergoeder(poly0,poly1,X1),
-//			sergoeder(polyInLo,polyInHi,X0));
-//	return union(
-//		sergoeder(inPoly0,inPolyMid,X0),
-//		sergoeder(inPolyMid,inPoly1,X1)
-//		);
-//	
-//	//return sergoeder(inPoly0,inPolyMid,X0);
-//	//return sergoeder(inPolyMid,inPoly1,X1);
-//	return difference(
-//		sergoeder(poly0,poly1,X),
-//		sergoeder(inPoly0,inPolyMid,X0),
-//		sergoeder(inPolyMid,inPoly1,X1)
-//	);
-//	
-//	return wall2solid(outWallLoHi[0]);
-//	return wall2solid(outWallLoHi[1]);
-//	return sergoeder(poly0,poly1,X);
-//	return sergoeder(poly0,poly1,X);
-	
 }
 function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	r=19;
@@ -881,37 +861,13 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 
 	var polyOutLo=[];
 	var i=0;
-	for(a=ang[0];a<=ang[1];a+=5,i++){
+	for(a=ang[0];a<=ang[1]+10;a+=5,i++){
 		polyOutLo[i]=[(R)*cos(a),(R)*sin(a),0];
 	}
 	for(a=ang[1];a>=ang[0];a-=5,i++){
 		polyOutLo[i]=[(R-borderW)*cos(a),(R-borderW)*sin(a),0];
 	}
-	
-	//wall=triangulate_wall(polyOutLo,polyOutHi,X);
-	
 	return solid_wall(polyOutLo,polyOutHi,X,1.1);
-	wallLoHi=split_wall(wall);
-	//wallLoBT=wall2bottomtop(wallLoHi[0]);
-	//wallHiBT=wall2bottomtop(wallLoHi[1]);
-	
-	//return 
-	//LoFlats=wall2bottomtop(wallLoHi[0]);
-	//LoFlats=triangulate()
-	polyInLo=contract(polyOutLo,1);
-	polyInHi=contract(polyOutHi,0.5);
-	return	difference(
-		//sergoeder(polyOutLo,polyOutHi,X),
-		//wall2solid(wallLoHi[1])
-		//wall2solid(wall)
-		//sergoeder(polyLoHi[0],polyLoHi[1],X)
-		sergoeder(polyInLo,polyInHi,X)
-		//sergoeder(polyOutLo,polyOutHi,X)
-		//wall2solid(wallLoHi[1])
-		//wall2solid(wall)
-		//sergoeder(polyLoHi[0],polyLoHi[1],X)
-		//sergoeder(polyInLo,polyInHi,X).translate([0,0,0])
-	);
 }
 
 
@@ -992,19 +948,22 @@ function main() {
 	//model.push(sergoeder(polyIn0,polyIn1,false));
 	
 	//model.push( tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]));
-	model.push( tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]));
-	return model;
-	nozzIn =tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]);
+	//model.push(
+	//nozzOut=tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
+	nozzOut=tube([rodx,rody],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
+	
+	//nozzIn =tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]);
+	//return model;
 	//return nozzIn;
-	nozzOut=tube([rodx,rody],[17,-17,0],[-70-asin(1/nozzleR),20+asin(1/nozzleR)],nozzleR,borderW,20,1,false).translate([0,0,8]);
+	//nozzOut=tube([rodx,rody],[17,-17,0],[-70-asin(1/nozzleR),20+asin(1/nozzleR)],nozzleR,borderW,20,1,false).translate([0,0,8]);
 	nozz=difference(
 			union(
 				nozzOut,
 				nozzOut.mirroredX(),
 				coolerRing(coolerR,nozzleR,4,borderW)
-			),
-			nozzIn,
-			nozzIn.mirroredX()
+			)
+			//nozzIn,
+			//nozzIn.mirroredX()
 		);
 	model.push(nozz);
 	//model.push(nozz.mirroredX());
