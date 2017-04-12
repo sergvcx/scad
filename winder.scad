@@ -15,11 +15,12 @@ include <mylib.scad>
     out= 58;
     in = 38;
     rodz = 75;
-    rodx = 10;
-    rody = 11.2;
+    //rodx = 10;
+    //rody = 11.2;
+    rodx = 11.2;
+    rody = 14;
     dist =35;
     h = 8;
-    
     
 module extruder(){
     dz=4;
@@ -137,25 +138,22 @@ module winder(h){
    
  
    difference(){
-        translate(fun_points[1])  3dtriangle([0,0,0],[0,12,0],[-12,0,0],2);    
+        translate(fun_points[1])  3dtriangle([0,0,0],[0,13,0],[-13,0,0],2);
         translate([33/2,-33/2,75]) cylinder(10,1.5);
    }
    difference(){
-        translate(fun_points[2])  rotate([0,0,90]) 3dtriangle([0,0,0],[0,12,0],[-12,0,0],2);    
+        translate(fun_points[2])  rotate([0,0,90]) 3dtriangle([0,0,0],[0,13,0],[-13,0,0],2);    
         translate([33/2,33/2,75]) cylinder(10,1.5);
    }
 }
 
 translate([0,0,80-0.1]) box(40,40,2,1.5);
-translate ([0,0,-40]) cooler();
+//translate ([0,0,-40]) cooler();
 winder(40);
 mirror([10,0,0]) winder(40);
 
-linear_extrude(10) union(){
-hull(){
-    circle(10);
-    translate([20,0,0]) circle(10);
+difference(){
+translate([0,30,0]) linear_extrude(height=82) circle(2+0.8);
+translate([0,30,0]) linear_extrude(height=82) circle(2);
 }
-    translate([20,20,0]) circle(10);
-}
-
+translate([0,0,79]) linear_extrude(height=3) polygon(points = [[14,19],[-14,19],[0,33]], paths = [ [0,1,2]]);
