@@ -17,8 +17,8 @@ include <mylib.scad>
     rodz = 75;
     //rodx = 10;
     //rody = 11.2;
-    rodx = 11.2;
-    rody = 14;
+    rody = 11.2;
+    rodx = 14;
     dist =35;
     h = 8;
     
@@ -119,7 +119,7 @@ module winder(h){
     ht=10;
     w=0.8;
     funh=80;
-    gap =0.2;
+    gap =0.06 ;
     rodh=40;
     // смещение
     disp=dist/2-w-gap;
@@ -129,7 +129,7 @@ module winder(h){
     RodLo= trans4([disp,-17,0],   rot4([0,0,-30],[[0,0,0],[rodx2,0,0],[rodx2,rody2,0],[0,rody2,0]]));
     RodHi= trans4([disp,-17,rodh],rot4([0,0,-30],[[0,0,0],[rodx2,0,ht],[rodx2,rody2,ht],[0,rody2,0]]));
     //points(RodHi);
-    supertube(RodLo,RodHi,w);
+    translate([0,0,+0.2]) supertube(RodLo,RodHi,w);
     
     fun_points=[[-w/2,-20,funh],[20,-20,funh],[20,20,funh],[-w/2,20,funh]];
     supertube(RodHi,fun_points,w); 
@@ -152,8 +152,8 @@ translate([0,0,80-0.1]) box(40,40,2,1.5);
 winder(40);
 mirror([10,0,0]) winder(40);
 
-difference(){
-translate([0,30,0]) linear_extrude(height=82) circle(2+0.8);
-translate([0,30,0]) linear_extrude(height=82) circle(2);
-}
-translate([0,0,79]) linear_extrude(height=3) polygon(points = [[14,19],[-14,19],[0,33]], paths = [ [0,1,2]]);
+//difference(){
+//translate([0,30,0]) linear_extrude(height=82) circle(2+0.8);
+//translate([0,30,0]) linear_extrude(height=82) circle(2);
+//}
+//translate([0,0,79]) linear_extrude(height=3) polygon(points = [[14,19],[-14,19],[0,33]], paths = [ [0,1,2]]);
