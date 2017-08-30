@@ -251,13 +251,24 @@ function extruder(){
 	).setColor([0.9,0,0,0.4]);
 }
 
-function star(R){
-	var star=cube({size:1});
+function star(R,R1){
+	var Star=cube({size:1});
+	var cyl=cylinder({r:R,h:10}).translate([0,0,1]);
+	var cyl1=cylinder({r:R1,h:10});
+	//return cyl;
     for(i=0;i<360;i+=10) {
-        star=star.union(cube({size:[R,2.5,2]}).translate([0,5,1]).rotateZ(i));
-		star=star.union(cube({size:[R,2.5,2]}).translate([0,5,0]).rotateY(-5).rotateZ(i));
+        Star=Star.union(cube({size:[R-R1,2.5,2]}).translate([R1-2,5,1]).rotateZ(i));
+		//Star=Star.union(cube({size:[R,2.5,2]}).translate([0,5,0]).rotateY(-5).rotateZ(i));
     }
-    return star;//=intersection(nozzleIn,star);
+		
+    //return intersection(Star,cyl);
+	//return union(
+	//for(i=0; i<360; i+=45/2){
+		//Star=Star.union(cube({size:[R,2.5,2]}).translate([0,5,1]).rotateZ(i))//,//,
+		//cube({size:[R,2.5,2]}).translate([0,5,1]).rotateZ(45)//,
+	//);
+	//}
+	return Star;
 }
 function ring(R1,R2,h){
 	return difference(
@@ -267,15 +278,14 @@ function ring(R1,R2,h){
 }
 		
 function coolerRing(R1,R2,h,border){
-   dz=4;
 	return 	difference(
-	    union(
+	   union(
 			cylinder({r1:R2,r2:R2,h:h}),
 			ring(R2-border,R2,4).translate([0,0,h])
 		),
-		cylinder({r1:R1,r2:R1,h:h}),
-		ring(R2-1-(border-2),R2-1,6).translate([0,0,1]),
-		star(R2-3)
+			cylinder({r1:R1,r2:R1,h:h}),
+			ring(R2-1-(border-2),R2-1,6).translate([0,0,1]),
+			star(R2-3,R1)
 	);
 }
 
@@ -868,13 +878,17 @@ function tube(rodSize,rodPos,ang,R,borderW,h,w){
 	
 	holer= sergoeder(contract(polyHolerLo,w),contract(polyOutLo,w),centre(polyHolerLo));
 	//return holer;
-	return [solid_wall(polyOutLo,polyOutHi,X,w),holer];
+	object=solid_wall(polyOutLo,polyOutHi,X,w);
+	return {
+		solid:object,
+		minus:holer
+	};
 }
 
 
 //========================================================
 function main() {
-    ShowPegGrid();
+    //ShowPegGrid();
 
 	a = 1, b = 2;
 	var dx0=10;
@@ -904,7 +918,7 @@ function main() {
 	//model.push(
 	//nozzOut=tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
 	//!nozzOut=tube([rodx,rody],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,0]);
-	nozzOut=tube([rodx,rody],[17,-17,0],[-70,20],nozzleR,borderW,20,1,false).translate([0,0,8]);
+	nozzOut=tube([rodx,rody],[17,-17,0],[-70,20],nozzleR,borderW,20,1,false);//.translate([0,0,8]);
 	 //return nozzOut;
 	//nozzIn =tube([rodx-2*w,rody-2*w],[17+w+0.4,-17+0.2,0],[-70,20],nozzleR-1,borderW-2,20,1,false).translate([0,0,8]);
 	//return model;
@@ -912,14 +926,14 @@ function main() {
 	//nozzOut=tube([rodx,rody],[17,-17,0],[-70-asin(1/nozzleR),20+asin(1/nozzleR)],nozzleR,borderW,20,1,false).translate([0,0,8]);
 	nozz=difference(
 			union(
-				nozzOut[0],
-				nozzOut[0].mirroredX(),
+				nozzOut.solid.translate([0,0,8]),
+				nozzOut.solid.translate([0,0,8]).mirroredX(),
 				difference(
-				coolerRing(coolerR,nozzleR,4,borderW),
-				nozzOut[1])
+					coolerRing(coolerR,nozzleR,4,borderW),
+					nozzOut.minus.translate([0,0,8]),
+					nozzOut.minus.translate([0,0,8]).mirroredX()
+				)
 			)
-			//nozzIn,
-			//nozzIn.mirroredX()
 		);
 	model.push(nozz);
 	
