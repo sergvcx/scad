@@ -96,6 +96,35 @@ module torusSlice(r1, r2, start_angle, end_angle, convexity=10, r3=0, $fn=64) {
     }
 }
 
+module torusFullSlice(r1, r2, start_angle, end_angle, convexity=10, $fn=64) {
+	rx = r1 + r2;
+    ry = rx;
+    trx = rx* sqrt(2) + 1;
+    try = ry* sqrt(2) + 1;
+    a0 = (4 * start_angle + 0 * end_angle) / 4;
+    a1 = (3 * start_angle + 1 * end_angle) / 4;
+    a2 = (2 * start_angle + 2 * end_angle) / 4;
+    a3 = (1 * start_angle + 3 * end_angle) / 4;
+    a4 = (0 * start_angle + 4 * end_angle) / 4;
+    if(end_angle > start_angle)
+        intersection() {
+			rotate_extrude(convexity=convexity) translate([r1,0,0]) circle(r2, $fn=$fn/4);
+			
+			translate([0,0,-r2-1])
+			linear_extrude(height=2*r2+2)
+        		polygon([
+		            [0,0],
+		            [trx * cos(a0), try * sin(a0)],
+		            [trx * cos(a1), try * sin(a1)],
+		            [trx * cos(a2), try * sin(a2)],
+		            [trx * cos(a3), try * sin(a3)],
+		            [trx * cos(a4), try * sin(a4)],
+		            [0,0]
+		       ]);
+    }
+}
+
+
 
 module trapezoid(a,b,h,aOffset=0,center=false) {
 	// lies in x/y plane

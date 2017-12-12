@@ -91,6 +91,65 @@ module curvedPipe(points, segments, radii, od, id) {
 }
 
 
+module tubeCurve(points,point,radii, od,id,isLastSegment=false) {
+	pre = points[point-1];
+	start = points[point];
+	mid = points[point+1];
+	end = points[point+2];
+
+	post = points[point+3];
+	preR = radii[point-1];
+	r = radii[point];	
+	postR = radii[point+1];
+
+	dir1 = subv(mid,start);
+	dir2 = subv(end,mid);
+	l1 = mod(dir1);
+	l2 = mod(dir2);
+	ang = anglev(dir1,dir2);
+
+	preDir = pre? subv(start,pre) : dir1;
+	preAng = pre? anglev(preDir, dir1) : 0;
+	preInset = pre? preR * tan(preAng/2) : 0;
+	
+	postDir = post? subv(post,end) : dir2;
+	postAng = post? anglev(dir2, postDir) : 0;
+	postInset = post? postR * tan(postAng/2) : 0;
+	
+	dir1u = unitv(dir1);
+	inset = r * tan(ang/2);
+	rStart = start + (l1-inset)*dir1u;
+	
+	// start
+	
+	translate(start) orientate(dir1) translate([0,0,preInset]) 
+	
+	cylinder (l1-preInset-inset,od/2, od/2, center=false);
+	//tube(h=l1-preInset-inset,or=od/2, ir=id/2, center=false);
+
+	//end
+	translate(mid) orientate(dir2) translate([0,0,inset]) 
+	cylinder (l2-postInset-inset,od/2,od/2, center=false);
+	//tube(h=l2-postInset-inset,or=od/2, ir=id/2, center=false);
+	
+	// curved section
+	// nb: torus slice always starts at x axis and goes counter clockwise around z
+	translate(rStart) 
+	pipeOrientate(dir1,dir2)
+	rotate([0,0,180])  // rotate to lie along x
+	rotate([90,0,0]) // flip up
+	translate([-r,0,0]) torusFullSlice(r1=r, r2=od/2,  start_angle=0, end_angle=ang);
+}
+
+
+module curvedTube(points, segments, radii, od, id) {
+	union() {
+		for (point = [0:segments-2]) 
+			tubeCurve(points,point,radii,od,id);
+	}
+}
+
+
 
 //test pieces
 if (true) {
