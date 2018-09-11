@@ -1,4 +1,5 @@
 use <../lib/curvedPipe.scad>   // Author: Juan Gonzalez-Gomez, GPL
+use <../lib/tubes.scad>   // Author: Juan Gonzalez-Gomez, GPL
 
 w= 2;
 tube_d=18-0.2;
@@ -112,7 +113,8 @@ module kalian(){
             
             
            translate([0,0,-2])  tube(w,59/2,59/2,15); // base
-           translate([0,0,-26]) tube(26,31.5/2,31.5/2,1.6); // tube cponnector
+           translate([0,0,-26]) tube_ext(26,36.6/2,37/2,1.6); // tube cponnector
+           translate([0,0,-3])  tube_ext(1,37/2,38.5/2,1.6); // tube cponnector
             
            //translate([0,0,-26]) cylinder (26,31.5/2,31.5/2); // tube cponnector
             

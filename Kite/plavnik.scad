@@ -10,12 +10,12 @@ module edge(R,dx){
 }
 
 
-hole=20;
-holeR=2.5;
-holeH=20;
-width=100;
-R=90;
-dx=5;
+hole=39/2;
+holeR=2.45;
+holeH=11;
+width=60;
+R=200;
+dx=4;
 
 difference(){
     hull(){
@@ -27,4 +27,4 @@ difference(){
     //translate([ 0, hole,0]) edge(R,dx);
     
 }
-$fn=90;		
+$fn=150;		

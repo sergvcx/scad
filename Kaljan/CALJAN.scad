@@ -1,6 +1,6 @@
 $fn=200;
 use <../lib/curvedPipe.scad>   // Author: Juan Gonzalez-Gomez, GPL
-
+use <../lib/mylib.scad>
 
 w= 2;
 tube_d=18-0.2;
@@ -135,9 +135,9 @@ difference(){
         
         
        // base 
-       translate([0,0,-2])  tube(w,59/2,59/2,15); // base plate
-       translate([0,0,-26]) tube(26,31.5/2,31.5/2,1.6); // tube cponnector
-       translate([0,0,-4])  tube(2, 31.5/2,31.5/2+1,1.6); // конус
+       translate([0,0,-2])  tube(w,59/2,59/2,59/2-37.5/2); // base plate
+       translate([0,0,-26]) tube(26,37.5/2,37.8/2,1.6); // tube cponnector
+       //translate([0,0,-4])  tube(2, 37.5/2,37.5/2+1,1.6); // конус
            
         
        //translate([0,0,-26]) cylinder (26,31.5/2,31.5/2); // tube cponnector
@@ -156,11 +156,12 @@ difference(){
     
         translate([0,0,-26])  tube_in(2,15/2,15/2,w);
         
-                         translate([11,-0,-25]) cube([7,2,2],center=true);
-        rotate ([0,0,90]) translate([11,-0,-25]) cube([7,2,2],center=true);
-        rotate ([0,0,180]) translate([11,-0,-25]) cube([7,2,2],center=true);
-        rotate ([0,0,270]) translate([11,-0,-25]) cube([7,2,2],center=true);
-        
+        for(ang=[0:90:360]){
+            
+            rotate ([0,0,ang])  translate([13,0,-26]) cubeZ0(10,2,2);
+            
+        }
+                           
         
         
     

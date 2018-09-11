@@ -40,24 +40,22 @@ h =10;
 //tube_ext(10,5,5,w);
 
 
-module puzzle_y(size,rInt,rExt,shiftInt, shiftExt, h){
-    dr=0.2;
+module puzzle_up(size,rInt,rExt,shiftInt, shiftExt, h, dr=0.5){
+    //dr=0.2;
     difference(){
         translate([-size/2,-size/2,0]) cube([size,size,h]);    
-    
-        translate([size/2-shiftInt,0,0])   cylinder(h/2,rInt,rInt+dr);    
-        translate([size/2-shiftInt,0,h/2]) cylinder(h/2,rInt+dr,rInt);    
-    
-        translate([-size/2+shiftInt,0,0])   cylinder(h/2,rInt,rInt+dr);    
-        translate([-size/2+shiftInt,0,h/2]) cylinder(h/2,rInt+dr,rInt);    
+        translate([size/2-shiftInt, 0,-0.01]) cylinder(h+0.02,rInt+dr,rInt);    
+        translate([-size/2+shiftInt,0,-0.01]) cylinder(h+0.02,rInt+dr,rInt);    
     }
-    translate([0,size/2+shiftExt,0])   cylinder(h/2,rExt,rExt+dr);    
-    translate([0,size/2+shiftExt,h/2]) cylinder(h/2,rExt+dr,rExt);    
+    translate([0,size/2+shiftExt, -0.01]) cylinder(h+0.01,rExt+dr,rExt);    
+    translate([0,-size/2-shiftExt,-0.01]) cylinder(h+0.01,rExt+dr,rExt);    
+}  
     
-    translate([0,-size/2-shiftExt,0])   cylinder(h/2,rExt,rExt+dr);    
-    translate([0,-size/2-shiftExt,h/2]) cylinder(h/2,rExt+dr,rExt);    
-    
-    
+module puzzle_lock(size,rInt,rExt,shiftInt, shiftExt, h, dr=0.5){
+    union(){
+        puzzle_up(size,rInt,rExt,shiftInt, shiftExt, h/2, dr);
+        translate([0,0,0.01]) mirror([0,0,1]) puzzle_up(size,rInt,rExt,shiftInt, shiftExt, h/2+0.01, dr);
+    }
 }
 
 module puzzle_x(size,rInt,rExt,shiftInt, shiftExt, h){
@@ -86,10 +84,10 @@ module puzzle_x_cut(size,r,shift,h,w){
     }
 }
 
-module puzzle_y_cut(size,r,shift,h,w){
+module puzzle_lock_cut(size,r,shift,h,w){
     difference(){
-        puzzle_y(size,r,r,shift,shift,h);
-        puzzle_y(size-2*w,r+w,r-w,shift-w,shift+w,h);
+        puzzle_lock(size,r,r,shift,shift,h);
+        puzzle_lock(size-2*w,r+w,r-w,shift-w,shift+w,h+0.01);
     }
 }
 
@@ -97,9 +95,10 @@ module puzzle_y_cut(size,r,shift,h,w){
 //translate([0,20+0.1,0])  puzzle_x_cut(20,3,1,2,0.1);
 
 module puzzleBlock(blockSizeX,blockSizeY,puzzleSize,r,shift,h,w){
-    for(y=[0:puzzleSize:blockSizeY]){
-        for(x=[0:puzzleSize:blockSizeX]){
-            translate([x,y,0]) rotate([0,0,90*x/puzzleSize+90*y/puzzleSize]) puzzle_y_cut(puzzleSize,r,shift,h,w);
+    translate([puzzleSize/2,puzzleSize/2,0])
+    for(y=[0:puzzleSize:blockSizeY-0.01]){
+        for(x=[0:puzzleSize:blockSizeX-0.01]){
+            translate([x,y,0]) rotate([0,0,90*x/puzzleSize+90*y/puzzleSize]) puzzle_lock_cut(puzzleSize,r,shift,h,w);
         }
     }
 }
@@ -110,14 +109,22 @@ translate([0,0,0]){
     translate([20,0,0])  rotate([0,0,90]) puzzle_y_cut(20,3,1,2,0.1);
     translate([20,20,0])   puzzle_y_cut(20,3,1,2,0.1);
 }
-*/
+
+
 difference(){
     cube([100,100,2]);
-    puzzleBlock(100,100,20,3,1,2,0.1);
+    puzzleBlock(100,100,15,3,1,2,0.1);
 }
+*/
 
-//puzzle_y_cut(20,3,1,2,0.1);
-//translate([0,210,0]) rotate([0,0,90]) puzzle_cut(20,3,1,2,0.1);
+
+
+
+//puzzle_up(20,3,3,1,1,6);
+//puzzle_lock(size=40,rInt=3,rExt=3,shiftInt=1, shiftExt=1, h=10);
+//puzzle_lock_cut(20,3,1,2,0.1);
+puzzleBlock(90,90,15,r=2,shift=1.2,h=5,w=0.3);
+
 //toy(80,12,20,0.7);
 //translate([0,0,81])
 

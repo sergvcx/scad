@@ -75,3 +75,22 @@ module rounded_cube(w,l,h,rv,rb,rt){
     */
     
 }
+
+module cubeZ0(xSize,ySize,zSize){
+    translate([0,0,zSize/2]) cube([xSize,ySize,zSize],center=true);
+}
+module cubeYZ0(xSize,ySize,zSize){
+    translate([0,-ySize/2,0]) cube([xSize,ySize,zSize]);
+}
+module cubeXZ0(xSize,ySize,zSize){
+    translate([-xSize/2,0,0]) cube([xSize,ySize,zSize]);
+}
+
+module skiletZ0(xSize,ySize,zSize,step=0.8,w=0.1){
+    for(y=[-ySize/2:step:ySize/2]){
+		for(x=[-xSize/2:step:xSize/2]){
+			translate([x,y,0]) cubeZ0(w,w,zSize);
+		}
+    }
+
+}

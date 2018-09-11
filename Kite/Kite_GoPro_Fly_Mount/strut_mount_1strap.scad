@@ -5,16 +5,16 @@ include <gopro_mounts_mooncactus.scad>
 
 $fn=20;
 //$fn=60;  //probably shouldn't use this for tweaking
-strut_radius=70;
-height=50;
+strut_radius=93/2;
+height=45;
 thick=5;
 
-slice=60;
+slice=80;
 
 strap_height=4+thick;
-strap_slot=3;
+strap_slot=3.5;
 strap_block=30;
-strap_w = 30;
+strap_w = 26;
 strap_offset=0;
 
 module body() {
@@ -81,13 +81,36 @@ module assembly() {
 			base();
 
 			translate([0,7.5+strap_height,13])
-			rotate([0,90,180])
-			gopro_connector_taper();
+                rotate([0,90,180])
+                    gopro_connector_taper();
 		}
 		straps();
 	}
     
-    translate ([0,17,0]) rotate  ([0,90,180]) gopro_connector("triple", withnut=true);
+    //translate ([0,17,0]) rotate  ([0,90,180]) gopro_connector("triple", withnut=true);
 }
 
-assembly();
+module nut(size,h){
+    x=$fn;
+    $fn=6;    
+    cylinder(h,size/sin(60)/2,size/sin(60)/2);
+}
+//gaika(100,20,8);
+
+$fn=26;
+
+//translate([20,20,20]) gaika(10,20,10);
+if (1) difference(){
+    union(){
+        translate([0,0,-height/2+3]) assembly();
+        hull(){
+            translate([0,6,0]) cube([20,1,height*1.3],center=true);
+            translate([0,15,0]) cube([15,15,15],center=true);
+        }
+        translate([0,0,+height/2-3]) assembly();
+    }
+    translate([0,-10,0]) rotate([-90,0,0]) cylinder(100,2.45,2.45);
+    translate([0,25-15/2-4.2,0]) rotate([-90,0,0]) nut(8,20);    
+    translate([0,-3,0]) rotate([-90,0,0]) cylinder(7,5,0);    
+}
+
