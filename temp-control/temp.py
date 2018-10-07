@@ -2,7 +2,8 @@ import serial
 import time
 import os 
 files = os.listdir(".") 
-logfile=files[0]
+#logfile=files[0]
+logfile="TEMPerX1.txt"
 print(files[0])
 
 #logs = filter(lambda x: x.endswith('.txt'), files) 
@@ -10,6 +11,11 @@ print(files[0])
 #	print (d)
 #exit()
  
+
+# pySerial can be installed from PyPI:
+
+#python -m pip install pyserial
+
 fd=serial.Serial("COM3",9600,timeout=3)
 
 print('50')
@@ -24,7 +30,7 @@ if answer==b'\xab':
 	print('51')
 	fd.write('\x51'.encode())
 
-time.sleep(1)
+time.sleep(1)  
 print('00')
 fd.write('\x00'.encode())
 

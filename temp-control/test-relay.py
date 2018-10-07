@@ -1,7 +1,7 @@
 import serial
 import time
  
-fd=serial.Serial("COM3",9600)
+fd=serial.Serial("COM8",9600)
 
 
 print('COM3')
@@ -47,6 +47,6 @@ fd.write('\x03'.encode())
 
 time.sleep(1)
 print('00 - Off Off')
-fd.write('\x00'.encode())
+fd.write('\x07'.encode())
 
 fd.close()
