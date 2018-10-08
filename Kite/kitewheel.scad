@@ -29,6 +29,6 @@ module wheel(h,r0,r1,w){
     
     //wall=1.2;
     tube_int(1.2,r0,r0,r1-r0+tireH);
-    translate([0,0,h-1.2]) tube_int(1.2,r0,r0,r1-r0+tireH);
+    //translate([0,0,h-1.2]) tube_int(1.2,r0,r0,r1-r0+tireH);
 }
 wheel(20,15/2,100/2,5,5,5);
