@@ -19,12 +19,12 @@ $fn=100;
 
 module wheel(h,r0,r1,w){
     tireH=0.5;
-    tube_int(h,r0,r0,w);
-    //tube_int(h,r0,r0,r1-r0);
-    tube_ext(h,r1,r1,w);
-    for(ang=[0:20:360]){
-        rotate([0,0,ang]) translate([0,r0,0]) cubeXZ0(2,r1-r0,h);
-    }
+    //tube_int(h,r0,r0,w);
+    tube_int(h,r0,r0,r1-r0);
+    //tube_ext(h,r1,r1,w);
+    //for(ang=[0:20:360]){
+    //    rotate([0,0,ang]) translate([0,r0,0]) cubeXZ0(2,r1-r0,h);
+    //}
     
     for(ang=[0:3:360]){
         for(y=[1:2:h-1]){
@@ -39,7 +39,7 @@ module wheel(h,r0,r1,w){
     //wall=1.2;
     tube_int(1.2,r0,r0,r1-r0+tireH);
    // translate([0,0,h-1.2]) tube_int(1.2,r0,r0,r1-r0+tireH);
-    translate([0,0,h])     tube_int(1.2,r0,r0,10);
+    translate([0,0,h])     tube_int(1.2,r0,r0,10); // shaiba
     
     
     
@@ -65,9 +65,13 @@ module wheel(h,r0,r1,w){
 }
 
 h=20;
-R= 70/2;
+//R= 70/2;
+R= 100/2;
 r= 12.3/2;
 
 // honeycomb(10, 10, 0, 10, 20, 50);
 
+difference(){
 wheel(h,r,R,3);
+translate([25,0,-19]) sphere(25);
+}
