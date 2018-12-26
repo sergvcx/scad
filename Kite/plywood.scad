@@ -76,32 +76,49 @@ module faska(h,r){
 
 //rotate ([0,-90,0]) chassis(120,130,130,12.2/2,6);
 R = 120;
+r = 12/2;
+W=350;
 module arc(){
     difference(){
         intersection(){
             circle(R);
             square(R,false);
         }
-        for (x=[0:8:R-2]){
+        for (x=[8*3:8:R-2]){
          translate ([x+2,2]) square(4,true);
         }
-        for (y=[0:8:R-2]){
+        for (y=[8*3:8:R-2]){
          translate ([2,y+2])  square(4,true);
+        }
+        hull(){
+            circle(r);
+            translate([r+3,r+3]) circle(r);
         }
     }
 }
 
+down=0.999;
+up = 1.0001;
 module plate(W,H){
     difference(){
-        square(W,H,false);
+        square([W,H],false);
+        square([W,12],false);
     
-        for (y=[0:8:H]){
-             translate ([2,y+2])  square(4,true);
+        for (y=[0-4:8:H]){
+             translate ([4*up/2,y+2])  square(4*up,true);
         }
-        for (y=[0:8:H]){
-             translate ([W-2,y+2])  square(4,true);
+        for (y=[0-4:8:H]){
+             translate ([W-4*up/2,y+2])  square(4*up,true);
         }
+        translate ([W-4*up/2,0])  square([4*up,4*5*2],true);
+        translate ([4*up/2,0])  square([4*up,4*5*2],true);
     }
 }
-//arc();
-plate(80,40);
+
+
+module block(){
+    translate([W-4*down,0,0]) arc();
+    plate(W,R);
+}
+translate([0,-R*up]) block();
+translate([0, R])mirror([0,1]) block();
