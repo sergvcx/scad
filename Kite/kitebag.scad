@@ -41,12 +41,12 @@ module chassis(xsize,ysize,zsize,r,w){
            rotate([0,90,0]) tube_int(xsize,ysize,ysize,60);       
            for (y=[15:20:ysize]){
             for (x=[10:20:xsize]){
-               translate([x,y,0]) cylinder(10,1.5,1.5);
+              // translate([x,y,0]) cylinder(10,1.5,1.5); holes
             }
           }
           for (z=[15:20:zsize]){
             for (x=[10:20:xsize]){
-               translate([x,0,z]) rotate([-90,0,0]) cylinder(10,1.5,1.5);
+            //   translate([x,0,z]) rotate([-90,0,0]) cylinder(10,1.5,1.5); holes
             }
           }
        }
