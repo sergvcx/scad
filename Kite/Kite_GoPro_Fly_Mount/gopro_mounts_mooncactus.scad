@@ -6,6 +6,7 @@
 // First head kind ("example" show them all but is not printable)
 //gopro_primary="triple"; // [example,triple,double]
 gopro_primary="triple"; // [example,triple,double]
+//gopro_primary="double"; // [example,triple,double]
 
 // The other head kind (only for the triple or double primary kind)
 gopro_secondary_what="none"; // [double,triple,rod,clamp,none]

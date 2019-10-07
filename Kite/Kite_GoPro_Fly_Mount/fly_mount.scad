@@ -1,7 +1,7 @@
-include <gopro_mounts_mooncactus.scad>
+//include <gopro_mounts_mooncactus.scad>
 include <../../lib/mylib.scad>
-  
-
+use <gopro_mounts_mooncactus.scad>
+//gopro_connector("triple");
 $fn=100;
 h = 14.7;
 ang = 35;
@@ -9,7 +9,7 @@ rod = 30;
 
  rotate([0,0,-(90-ang)])  translate([0,-11,0])        gopro_connector("triple", withnut=true);
   
-difference(){
+if (1) difference(){
     union(){
         hull(){
             //translate([-h/2, 10,-h/2])  

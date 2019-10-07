@@ -101,16 +101,17 @@ $fn=26;
 
 //translate([20,20,20]) gaika(10,20,10);
 if (1) difference(){
+    ang = 30;
     union(){
         translate([0,0,-height/2+3]) assembly();
         hull(){
             translate([0,6,0]) cube([20,1,height*1.3],center=true);
-            translate([0,15,0]) cube([15,15,15],center=true);
+            translate([0,12,5]) rotate([ang,0,0]) cube([15,12,15],center=true);
         }
         translate([0,0,+height/2-3]) assembly();
     }
-    translate([0,-10,0]) rotate([-90,0,0]) cylinder(100,2.45,2.45);
-    translate([0,25-15/2-4.2,0]) rotate([-90,0,0]) nut(8,20);    
-    translate([0,-3,0]) rotate([-90,0,0]) cylinder(7,5,0);    
+    #translate([0,-10,-5]) rotate([-90+ang,0,0]) cylinder(100,2.45,2.45);
+    //translate([0,25-15/2-4.2,0]) rotate([-90,0,0]) nut(8,20);    
+    #translate([0,-13,-5]) rotate([-90+ang,0,0]) cylinder(17,15,0);    
 }
 
