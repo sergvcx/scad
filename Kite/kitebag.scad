@@ -103,14 +103,14 @@ module recttube_ext(x,y,h,w){
 
 module chassis(){
 	size=100;
-	w0=3.6;
+	w0=3.6+1.4;
 	w=w0*sin(55);
 	w2=w0*sin(55);
 	r=13/2;
 	deep=r+r/2+2;
 	clipseZ=25;
 	clipseH=15;
-	clipseW=1.4;
+	clipseW=1.4-0.4;
 	rc=5; //round cube
 	difference(){
 		union(){
@@ -118,13 +118,16 @@ module chassis(){
 			//cube([w,size,size]);
 			//cube([size,w,size]);
 			difference(){
-				translate([size/2,size/2,0]) rounded_cube(size,size,size,rc,rc,rc);
-				translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc-w2*1.5,rc-w2*1.5,rc-w2*1.5);
+				translate([size/2,size/2,0]) rounded_cube(size,size,size,rc+w,rc+w,rc+w);
+				translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc,rc,rc);
 			}
 			//translate([deep,deep,0]) tube_int(size,r,r,w);
-			translate([deep,deep,0]) cylinder(size,r+w0,r+w0);
+			// tube ext
+			translate([deep,deep,0]) cylinder(size,r+w0/2,r+w0/2);
+			translate([deep+5,deep+5,10]) rotate([0,0,45]) cubeZ0(w0,30,size);
+			
 			translate([deep,deep,-0.6]) cylinder(0.6,r+5,r+5);
-			rotate([0,0,-45])cubeZ0(2*r+2*w0,2*deep/sin(45),size);
+			//rotate([0,0,-45])cubeZ0(2*r+2*w0,2*deep/sin(45),size);
 			//translate([deep+(r)*sin(45),deep+(r)*sin(45),0]) rotate([0,0,-45]) cubeZ0(20,w,size);
 		}
 		translate([0,0,-1]) rotate([0,0,-45])cubeZ0(2*r,2*deep/sin(45),clipseZ+1);
@@ -139,8 +142,8 @@ module chassis(){
 		translate([0,0,clipseZ+40+clipseH]) rotate([0,0,-45]) cubeZ0(2*r,2*deep/sin(45),size-clipseZ-clipseH);
 		
 		
-		
-		translate([deep,deep,-1]) cylinder(size+1,r,r);		
+		//tube int 
+		#translate([deep,deep,-1]) cylinder(size+1,r,r);		
 		translate([-0.5,-0.5,-1]) cubeZ0(2*(r+w)/sin(45),2*(r+w)/sin(45),size+1);		
 		translate([-100*sin(45)/2+7,7-100*sin(45)/2,50-1]) rotate([0,0,45]) cube([size,size,size+3],center=true);		
 		
