@@ -81,7 +81,7 @@ module power_bank(){
     }
 }
 //toy(80,16,360,0.4);
-toy(80,16,360,0.4);
+toy(80,16,360,1);
 translate([0,0,81]) difference(){
     translate([-1,0,0]) rotate([0,90,0]) tube_int(2,1,1,2);
     translate([0,0,-4]) cylinder(5,3,0);    

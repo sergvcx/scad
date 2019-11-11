@@ -58,13 +58,12 @@ module rounded_cylinder(h,r,rb,rt){
 }
 
 module rounded_cube(w,l,h,rv,rb,rt){
-    
-    hull(){
-        translate([-w/2+rv,-l/2+rv,0]) rounded_cylinder(h,rv,rb,rt);
-        translate([-w/2+rv,+l/2-rv,0]) rounded_cylinder(h,rv,rb,rt);
-        translate([+w/2-rv,+l/2-rv,0]) rounded_cylinder(h,rv,rb,rt);
-        translate([+w/2-rv,-l/2+rv,0]) rounded_cylinder(h,rv,rb,rt);
-    }
+	hull(){
+		translate([-w/2+rv,-l/2+rv,0]) rounded_cylinder(h,rv,rb,rt);
+		translate([-w/2+rv,+l/2-rv,0]) rounded_cylinder(h,rv,rb,rt);
+		translate([+w/2-rv,+l/2-rv,0]) rounded_cylinder(h,rv,rb,rt);
+		translate([+w/2-rv,-l/2+rv,0]) rounded_cylinder(h,rv,rb,rt);
+	}
     
    /* 
     minkowski(){
@@ -85,6 +84,9 @@ module cubeYZ0(xSize,ySize,zSize){
 module cubeXZ0(xSize,ySize,zSize){
     translate([-xSize/2,0,0]) cube([xSize,ySize,zSize]);
 }
+module cubeYZ0(xSize,ySize,zSize){
+    translate([0,-ySize/2,0]) cube([xSize,ySize,zSize]);
+}
 
 module skiletZ0(xSize,ySize,zSize,step=0.8,w=0.1){
     for(y=[-ySize/2:step:ySize/2]){
@@ -94,6 +96,7 @@ module skiletZ0(xSize,ySize,zSize,step=0.8,w=0.1){
     }
 
 }
+
 
 module arced_cube(xSize,ySize,zCube){
 	radius = xSize/2;
