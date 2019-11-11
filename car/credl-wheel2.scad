@@ -60,8 +60,8 @@ module upper_lips(){
 	r=3;
 	h=5;
 	d=20;
-	MY=1.5;
-	hr=12;
+	MY=2.0;
+	hr=8; // радус расстановки магнитов
 	difference(){
 	if (1) intersection(){
 		translate([0,-15,-R/2]) cubeXZ0(R*2,R*5,R);
@@ -70,20 +70,20 @@ module upper_lips(){
 				hull(){
 					translate([-d,0,h]) sphere (r);
 					translate([ d,0,h])sphere (r);
-					translate([ -d,2*d,h])  sphere (r);
-					translate([ d, 2*d,h]) sphere (r);
+					translate([ -d,4*d,h])  sphere (r);
+					translate([ d, 4*d,h]) sphere (r);
 
 					scale([1,MY,(h+3)/R]) sphere(R);
 				}
 				translate([0,0,-15]) scale([1,MY,1]) cylinder(15,R,R);
 			}
-			translate([0,20,0]){
+			translate([0,3*d,0]) rotate([0,0,45]){
 				translate ([-hr,-hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
 				translate ([-hr, hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
 				translate ([ hr, hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
 				translate ([ hr,-hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
 			}
-			translate([0,20,0]){
+			translate([0,3*d,0]) rotate([0,0,45]){
 				translate ([-hr,-hr,-15]) cylinder (50,2,2);
 				translate ([-hr, hr,-15]) cylinder (50,2,2);
 				translate ([ hr, hr,-15]) cylinder (50,2,2);
@@ -338,8 +338,14 @@ module wall(){
 	}
 }
 
-wall();
-//rotate([90,0,0]) upper_lips();
+minkowsky(){
+cube (10);
+}
+
+//rot(upper_lips());
+//wall();
+//rotate([90,0,0]) 
+//upper_lips();
 //rotate([90,0,0])
 //translate([0,25,-17]) lower_lips();
 
