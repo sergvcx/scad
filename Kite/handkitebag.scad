@@ -103,21 +103,23 @@ module recttube_ext(x,y,h,w){
 
 module chassis(){
 	size=100;
-	w0=3.6+1.3;
+	w0=3.6+1.2;
 	w=w0*sin(55);
 	w2=w0*sin(55);
-	r=(4-0.0)/2;
-	deep=4*r;
+	r=(3-0.0)/2;
+	
+	deep=w2*2;
 	clipseZ=25;
 	clipseH=15;
 	clipseW=1.4-0.4;
-	spring_r=5;
-	rc=3; //round cube
+	spring_r=8/2;
+	rc=4; //round cube
+	rcext=rc+1.6*w2;
 	dd=0;
 	//translate([deep-(r+w0)/2,deep+r+w0-w0/4-1,1]) rotate([0,0,90]) cubeZ0(w0/2,(r+w0),size-2);
 	//translate([deep+r+w0-w0/4-1,deep-(r+w0)/2,1]) rotate([0,0,0]) cubeZ0(w0/2,(r+w0),size-2);
-	arch=30;
-	arcr=30;
+	arch=22;
+	arcr=56/2;
 	
 	difference(){
 		union(){
@@ -125,22 +127,25 @@ module chassis(){
 			//cube([w,size,size]);
 			//cube([size,w,size]);
 			difference(){
-				translate([size/2,size/2,0])   rounded_cube(size,size,size,rc+w+1.0,rc+w+1.0,rc+w+1.0);
-				translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc+1,rc+1,rc+1);
+				translate([size/2,size/2,0])   rounded_cube(size,size,size,rcext,rcext,rcext);
+				translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc,rc,rc);
 			}
 			// arc ext
 			intersection(){
 				translate([deep,deep,w2]) cylinder(arch,arcr,arcr);
-				translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc+1,rc+1,rc+1);
+				translate([size/2,size/2,0])   rounded_cube(size,size,size,rcext,rcext,rcext);
+			}
+			intersection(){
+				translate([deep,deep,5]) cylinder(size-7,spring_r+w2,spring_r+w2);
+				translate([size/2,size/2,0])   rounded_cube(size,size,size,rcext,rcext,rcext);
 			}
 			//translate([deep,deep,0]) tube_int(size,r,r,w);
 			// tube ext
-			translate([deep,deep,0]) cylinder(size-1,r+w0-1,r+w0-1);
 			// partition
 			//translate([deep-(r+w0)/2,deep+r+w0/2,1]) rotate([0,0,90]) cubeZ0(w0,(r+w0),size-2);
 			//#translate([deep+r+w0/2,deep-(r+w0)/2,1]) rotate([0,0,0]) cubeZ0(w0,(r+w0),size-2);
 			// spacer
-			translate([deep,deep,-0.6]) cylinder(0.6,r+5,r+5);
+			//translate([deep,deep,-0.6]) cylinder(0.6,r+5,r+5);
 			//rotate([0,0,-45])cubeZ0(2*r+2*w0,2*deep/sin(45),size);
 			//translate([deep+(r)*sin(45),deep+(r)*sin(45),0]) rotate([0,0,-45]) cubeZ0(20,w,size);
 		}
@@ -149,8 +154,10 @@ module chassis(){
 		//tube int 
 		translate([deep,deep,-1]) cylinder(size+1,r,r);		
 		
-		translate([deep,deep,2*w2]) cylinder(arch-2*w2,arcr-w2,arcr-w2);
+		// wheel
+		translate([deep,deep,w2]) cylinder(arch-w2,arcr-w2,arcr-w2);
 		translate([deep,deep,arch+10]) cylinder(100,spring_r,spring_r);
+		translate([deep,deep,arch+0]) cylinder(10,0,spring_r);
 			
 		// скос для входа
 		//translate([-1.9,-1.9,-1]) cubeZ0(2*(r+w)/sin(45),2*(r+w)/sin(45),size+1);		
@@ -158,14 +165,17 @@ module chassis(){
 		//#translate([-100*sin(45)/2+7,7-100*sin(45)/2,50-1]) rotate([0,0,45]) cube([size,size,size+3],center=true);		
 		
 		//------ holes 
-		translate([2*r+25,10,20])rotate([90,0,0]) cylinder(100,5/2,5/2);
-		translate([2*r+25,10,65])rotate([90,0,0]) cylinder(100,5/2,5/2);
-		translate([2*r+65,10,20])rotate([90,0,0]) cylinder(100,5/2,5/2);
+		//#translate([2*r+25,10,20])rotate([90,0,0]) cylinder(100,5/2,5/2);
+		translate([25,10,65])rotate([90,0,0]) cylinder(100,5/2,5/2);
+		translate([65,10,25])rotate([90,0,0]) cylinder(100,5/2,5/2);
 		
-		translate([-10,2*r+25,20])rotate([0,90,0]) cylinder(100,5/2,5/2);
-		translate([-10,2*r+25,65])rotate([0,90,0]) cylinder(100,5/2,5/2);
-		translate([-10,2*r+65,20])rotate([0,90,0]) cylinder(100,5/2,5/2);
+		translate([-10,25,65])rotate([0,90,0]) cylinder(100,5/2,5/2);
+		translate([-10,65,25])rotate([0,90,0]) cylinder(100,5/2,5/2);
 		
+		translate([65,25,-10])rotate([0,0,90]) cylinder(100,5/2,5/2);
+		translate([25,65,-10])rotate([0,0,90]) cylinder(100,5/2,5/2);
+		
+		translate([-0,2,arch+3*w2])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		
 	}
 }
@@ -180,12 +190,12 @@ if (0) for(x=[1:0.2:5]){
 //translate([11,0,0]) cube([3,10,20]);
 //chassis();
 if (1) intersection(){
-	cylinder(100,75,75);
-	translate([00,19,10]) rotate([0,90,0]) cylinder(200,65,65,center=true);
-	rotate([0,90,30]) translate([00,0,-149]) cylinder(200,80,80);
-	rotate([0,90,180-30]) translate([00,0,-149]) cylinder(200,80,80);
-	translate([0,3,75])
-	rotate([-35-90,0,0]) rotate([0,0,45]) chassis();
+	cylinder(100,85,75);
+	translate([00,-30,30]) rotate([90-30,0,0]) cylinder(200,85,85,center=true);
+	translate([00,27,0]) rotate([0,90,0]) cylinder(200,65,65,center=true);
+	rotate([0,90,30]) translate([00,0,-158]) cylinder(200,80,80);
+	rotate([0,90,180-30]) translate([00,0,-158]) cylinder(200,80,80);
+	translate([0,3,61])	rotate([-35-90,0,0]) rotate([0,0,45]) chassis();
 }
 
 
