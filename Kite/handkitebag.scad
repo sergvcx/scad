@@ -49,34 +49,35 @@ module recttube_ext(x,y,h,w){
 	}
 }
 
+
+size=105;
+w0=3.6+1.2;
+w=w0*sin(55);
+w2=w0*sin(55);
+r=(3.2-0.0)/2;
+
+//deep=w2*2;
+deep=8.5;
+spring_r=9/2;
+rc=4; //round cube
+rcext=rc+1.6*w2;
+dd=0;
+arch=25;
+arcr=56/2;
+
 module chassis(){
-	size=100;
-	w0=3.6+1.2;
-	w=w0*sin(55);
-	w2=w0*sin(55);
-	r=(3.2-0.0)/2;
 	
-	//deep=w2*2;
-	deep=8.5;
-	clipseZ=25;
-	clipseH=15;
-	clipseW=1.4-0.4;
-	spring_r=9/2;
-	rc=4; //round cube
-	rcext=rc+1.6*w2;
-	dd=0;
 	//translate([deep-(r+w0)/2,deep+r+w0-w0/4-1,1]) rotate([0,0,90]) cubeZ0(w0/2,(r+w0),size-2);
 	//translate([deep+r+w0-w0/4-1,deep-(r+w0)/2,1]) rotate([0,0,0]) cubeZ0(w0/2,(r+w0),size-2);
-	arch=25;
-	arcr=56/2;
 	//color ("blue") translate([deep,deep,w2+1])  cylinder(arch-2*w2-2,arcr-2,arcr-2);
+	//echo(arch-2*w2-2);
 
 	difference(){
 		union(){
 			
 			//cube([size,size,w]);
 			//cube([w,size,size]);
-			translate([deep,deep,w2]) sphere (spring_r+w2);
+			translate([deep,deep,w2+1.5]) sphere (spring_r+w2);
 			// усилитель боковины
 			difference(){
 				translate([arcr/2+10,arcr/2+10,0]) rounded_cube(arcr+20,arcr+20,10,spring_r+w2,1,1);
@@ -105,8 +106,8 @@ module chassis(){
 		// wheel
 		difference(){
 			translate([deep,deep,w2]) cylinder(arch-2*w2,arcr-w2,arcr-w2);
-			translate([deep,deep,w2]) cylinder(1,spring_r+w2,spring_r+w2);
-			translate([deep,deep,arch-w2-1]) cylinder(1,spring_r+w2,spring_r+w2);
+			translate([deep,deep,w2]) cylinder(1,spring_r+w2,spring_r+w2-1);
+			translate([deep,deep,arch-w2-1]) cylinder(1,spring_r+w2-1,spring_r+w2);
 		}
 		translate([deep,deep,w2]) cylinder(1,r,r+1);
 		// spring hole
@@ -116,21 +117,24 @@ module chassis(){
 			
 		
 		//------ holes 
-		translate([25,10,65])rotate([90,0,0]) cylinder(100,5/2,5/2);
-		translate([65,10,25])rotate([90,0,0]) cylinder(100,5/2,5/2);
-		
-		translate([-10,25,65])rotate([0,90,0]) cylinder(100,5/2,5/2);
-		translate([-10,65,25])rotate([0,90,0]) cylinder(100,5/2,5/2);
-		
-		translate([65,25,-10])rotate([0,0,90]) cylinder(100,5/2,5/2);
-		translate([25,65,-10])rotate([0,0,90]) cylinder(100,5/2,5/2);
+		translate([30,10,60])rotate([90,0,0]) cylinder (100,4.5/2,4.5/2);
+		translate([65,10,25])rotate([90,0,0]) cylinder (100,4.5/2,4.5/2);
+																  
+		translate([-10,30,60])rotate([0,90,0]) cylinder(100,4.5/2,4.5/2);
+		translate([-10,65,25])rotate([0,90,0]) cylinder(100,4.5/2,4.5/2);
+																  
+		translate([65,25,-10])rotate([0,0,90]) cylinder(100,4.5/2,4.5/2);
+		translate([25,65,-10])rotate([0,0,90]) cylinder(100,4.5/2,4.5/2);
 
 		//nail 
+		echo(arch+3);
+
 		translate([-0,r+1,arch+3])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		translate([-0,r+1.5,arch+5])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		translate([-0,r+1.5,arch+7])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		//#translate([-0,r+1.5,arch+9])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		
+		translate([-0,-r+-1,arch+2])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		translate([-0,-r+-1.5,arch+4])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		translate([-0,-r+-1.5,arch+6])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		//#translate([-0,-r+-1.5,arch+8])rotate([0,90,45]) cylinder(100,1/2,1/2);
@@ -150,14 +154,23 @@ module wheel(){
 //translate([11,0,0]) cube([3,10,20]);
 
 module final(){
- intersection(){
-	cylinder(100,85,75);
-	//#translate([00,-30,30]) rotate([90-30,0,0]) cylinder(200,85,85,center=true);
-	translate([00,27,0]) rotate([0,90,0]) cylinder(200,65,65,center=true);
-	rotate([0,90,30]) translate([00,0,-158]) cylinder(200,80,80);
-	rotate([0,90,180-30]) translate([00,0,-158]) cylinder(200,80,80);
-	translate([0,3,61])	rotate([-35-90,0,0]) rotate([0,0,45]) chassis();
-}
+	 intersection(){
+		cylinder(100,85,75);
+		translate([00,-20,30]) rotate([90-30,0,0]) cylinder(200,85,85,center=true);
+		//translate([0,-25,30]) rotate([90,0,0]) cylinder(200,85,85,center=true);
+		translate([00,28,2]) rotate([0,90,0]) cylinder(200,65,65,center=true);
+		rotate([0,90,30]) translate([00,0,-158]) cylinder(200,80,80);
+		rotate([0,90,180-30]) translate([00,0,-158]) cylinder(200,80,80);
+		translate([0,3,60])	rotate([-35-90,0,0]) rotate([0,0,45]) chassis();
+	}
+	
+	//translate([0,3,61])	rotate([-35-90,0,0]) rotate([0,0,45])
+	//difference(){
+	//	translate([deep,deep,25])  cylinder(size-7+20,spring_r+w2,spring_r+w2);
+	//	translate([deep,deep,25]) cylinder(250,spring_r,spring_r);
+	//}
+
+		
 }
 module final_plus(){
 
@@ -166,5 +179,5 @@ module final_plus(){
 	
 	}
 }
-
+//chassis();
 final(1);
