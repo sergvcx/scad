@@ -54,7 +54,7 @@ size=105;
 w0=3.6+1.2;
 w=w0*sin(55);
 w2=w0*sin(55);
-r=(3.2-0.0)/2;
+r=(3.2-0.0)/2+0.1+0.1;
 
 //deep=w2*2;
 deep=8.5;
@@ -65,11 +65,25 @@ dd=0;
 arch=25;
 arcr=56/2;
 
+$fn=200;
+module wheell(){
+	rotate_extrude(convexity = 10)
+	translate([spring_r+w2, 0, 0])
+	circle(r = 0.5, $fn = 100);
+	difference(){
+	//color ("blue") translate([deep,deep,w2+1])  
+	cylinder(arch-2*w2-2-1,arcr-8,arcr-8);
+	echo(arcr-5);
+	cylinder(100,r,r);
+	rotate([0,90,0])cylinder(2*(spring_r+w2),0.5,0.5,center=true);
+	}
+}
+
 module chassis(){
 	
 	//translate([deep-(r+w0)/2,deep+r+w0-w0/4-1,1]) rotate([0,0,90]) cubeZ0(w0/2,(r+w0),size-2);
 	//translate([deep+r+w0-w0/4-1,deep-(r+w0)/2,1]) rotate([0,0,0]) cubeZ0(w0/2,(r+w0),size-2);
-	//color ("blue") translate([deep,deep,w2+1])  cylinder(arch-2*w2-2,arcr-2,arcr-2);
+	
 	//echo(arch-2*w2-2);
 
 	difference(){
@@ -130,13 +144,13 @@ module chassis(){
 		echo(arch+3);
 
 		translate([-0,r+1,arch+3])rotate([0,90,45]) cylinder(100,1/2,1/2);
-		translate([-0,r+1.5,arch+5])rotate([0,90,45]) cylinder(100,1/2,1/2);
-		translate([-0,r+1.5,arch+7])rotate([0,90,45]) cylinder(100,1/2,1/2);
+		//translate([-0,r+1.5,arch+5])rotate([0,90,45]) cylinder(100,1/2,1/2);
+		//translate([-0,r+1.5,arch+7])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		//#translate([-0,r+1.5,arch+9])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		
-		translate([-0,-r+-1,arch+2])rotate([0,90,45]) cylinder(100,1/2,1/2);
-		translate([-0,-r+-1.5,arch+4])rotate([0,90,45]) cylinder(100,1/2,1/2);
-		translate([-0,-r+-1.5,arch+6])rotate([0,90,45]) cylinder(100,1/2,1/2);
+		translate([-0,-r+-1.5,arch+3])rotate([0,90,45]) cylinder(100,1/2,1/2);
+		//translate([-0,-r+-1.5,arch+4])rotate([0,90,45]) cylinder(100,1/2,1/2);
+		//translate([-0,-r+-1.5,arch+6])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		//#translate([-0,-r+-1.5,arch+8])rotate([0,90,45]) cylinder(100,1/2,1/2);
 		
 	}
@@ -181,3 +195,4 @@ module final_plus(){
 }
 //chassis();
 final(1);
+//rotate ([180,0,0]) wheell();

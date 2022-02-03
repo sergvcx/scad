@@ -3,7 +3,6 @@ include <lib/mylib.scad>
 include <lib/tubes.scad>
 
 //r=7;
-
 module tablet(r0,r1){
     cube(20,center=true);
     hull(){

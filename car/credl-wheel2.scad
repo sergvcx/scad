@@ -56,42 +56,44 @@ module surfaceData(M, center=false, convexity=10){
 
 
 module upper_lips(){
+	magneth=5.25/3;
 	R=50;
 	r=3;
-	h=5;
-	d=20;
-	MY=2.0;
-	hr=8; // радус расстановки магнитов
+	h=5; // h+r -hull высота
+	d=21;
+	MY=1.6;
+	hr=9; // радус расстановки магнитов
 	difference(){
 	if (1) intersection(){
-		translate([0,-15,-R/2]) cubeXZ0(R*2,R*5,R);
+		translate([0,-15,-R/2]) cubeYZ0(R*2,R*5,R);
 		if (1) difference(){
 			union(){
 				hull(){
 					translate([-d,0,h]) sphere (r);
-					translate([ d,0,h])sphere (r);
-					translate([ -d,4*d,h])  sphere (r);
-					translate([ d, 4*d,h]) sphere (r);
+					translate([ d,0,h]) sphere (r);
+					//translate([ -d,2.5*d,h])  sphere (r);
+					//translate([ d, 2.5*d,h]) sphere (r);
+					translate([0,1.5*d,h]) cylinder(r,d,d);
 
 					scale([1,MY,(h+3)/R]) sphere(R);
 				}
-				translate([0,0,-15]) scale([1,MY,1]) cylinder(15,R,R);
+				translate([0,0,-8]) scale([1,MY,1]) cylinder(8,R,R);
 			}
-			translate([0,3*d,0]) rotate([0,0,45]){
-				translate ([-hr,-hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
-				translate ([-hr, hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
-				translate ([ hr, hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
-				translate ([ hr,-hr,h+r-5.5]) cylinder (6,12.8/2,12.4/2);
+			translate([0,1.5*d,0]) rotate([0,0,45]){
+				translate ([-hr,-hr,h+r-magneth*2+0.25]) cylinder (6,(12.8-0.2)/2,(12.4-0.2)/2);
+				translate ([-hr, hr,h+r-magneth*2+0.25]) cylinder (6,(12.8-0.2)/2,(12.4-0.2)/2);
+				translate ([ hr, hr,h+r-magneth*2+0.25]) cylinder (6,(12.8-0.2)/2,(12.4-0.2)/2);
+				translate ([ hr,-hr,h+r-magneth*2+0.25]) cylinder (6,(12.8-0.2)/2,(12.4-0.2)/2);
 			}
-			translate([0,3*d,0]) rotate([0,0,45]){
+			translate([0,1.5*d,0]) rotate([0,0,45]){
 				translate ([-hr,-hr,-15]) cylinder (50,2,2);
 				translate ([-hr, hr,-15]) cylinder (50,2,2);
 				translate ([ hr, hr,-15]) cylinder (50,2,2);
 				translate ([ hr,-hr,-15]) cylinder (50,2,2);
 			}
 			// hole
-			translate([0,2,-2]){
-				translate([-R,0,1.5]) rotate([0,90,0]) cylinder(2*R,2.5,2.5);
+			translate([0,2,-1]){
+				translate([-R,0,1]) rotate([0,90,0]) cylinder(2*R,2,2);
 				translate([R-37,-20,-1])  cube([37,0+20,1]);
 				mirror([1,0,0]) 
 				translate([R-37, -20,-1])  cube([37,0+20,1]);
@@ -261,6 +263,11 @@ module upper_lips(){
 			function_grapher(g, thickness); 
 		}
 	}
+	
+	translate([0,MY*R+16,-19]) sphere(25);
+	#translate([-10,0,h+r-1]) cube([4,30,2],center=true);
+	#translate([ 10,0,h+r-1]) cube([4,30,2],center=true);
+	
 	}
 
 }
@@ -307,45 +314,68 @@ module lower_lips(){
 				mirror([1,0,0]) 
 				translate([(x_size/2-37),-2,-20])  cube([37,1,20]);
 			}
+			
  
 	}
 }
 
 module wall(){
-	hr=10;
-	w=6;
+	magneth=5.25/3;
+	hr=8;
+	w=magneth*4;
 	h=5;
 	r=4;
 	difference(){
-		rounded_cube(w,45,70,1,2,2);
-		translate([0,0,50]) rotate([0,90,0]){
-			translate([0,0,0]){
-				translate ([-hr,-hr,0]) cylinder (6,12.8/2,12.2/2);
-				translate ([-hr, hr,0]) cylinder (6,12.8/2,12.2/2);
-				translate ([ hr, hr,0]) cylinder (6,12.8/2,12.2/2);
-				translate ([ hr,-hr,0]) cylinder (6,12.8/2,12.2/2);
+		union(){
+			rounded_cube(w,45,50,1,2,2);
+			
+			minkowski(){
+				translate([0,0,50]) rotate([0,90,0]) cylinder (w-2,45/2-1,45/2-1,center=true);
+				sphere(1);
 			}
-			translate([0,0,0]){
+			//hull(){
+			translate([0,0,1]) minkowski(){
+				cylinder (w-2,45/2-1,45/2-1);
+				sphere(1);
+			}
+			//translate([0,0,10]) sphere(1);
+			//}
+		}
+		translate([0,0,50]) rotate([0,90,0]){
+			translate([0,0,0]) rotate([0,0,45]){
+			    
+				translate ([-hr,-hr,-4]) cylinder (10,12.0/2,12.0/2);
+				translate ([-hr, hr,-4]) cylinder (10,12.0/2,12.0/2);
+				translate ([ hr, hr,-4]) cylinder (10,12.0/2,12.0/2);
+				translate ([ hr,-hr,-4]) cylinder (10,12.0/2,12.0/2);
+			}
+			translate([0,0,0]) rotate([0,0,45]){
 				translate ([-hr,-hr,-15]) cylinder (50,2,2);
 				translate ([-hr, hr,-15]) cylinder (50,2,2);
 				translate ([ hr, hr,-15]) cylinder (50,2,2);
 				translate ([ hr,-hr,-15]) cylinder (50,2,2);
 			}
 		}
-		translate ([0,-10,0]) cylinder (10,1,1);
-		translate ([0, 10,0]) cylinder (10,1,1);
-		cubeZ0(50,50,1.5)	;
+		//translate ([0,-10,0]) cylinder (10,1,1);
+		//translate ([0, 10,0]) cylinder (10,1,1);
+		
+		difference(){
+		//cylinder (2.5,25/2,25.4/2);
+		cylinder (3.3,37/2,37.4/2);
+		cylinder (3.3,13/2,13/2);
+		}
+		//cubeZ0(50,50,1.5)	;
 	}
 }
 
-minkowsky(){
-cube (10);
+if (0) minkowski(){
+	upper_lips();  
+	cube(1);
 }
 
-//rot(upper_lips());
-//wall();
-//rotate([90,0,0]) 
 //upper_lips();
+//wall();
+rotate([90,0,0]) upper_lips();
 //rotate([90,0,0])
 //translate([0,25,-17]) lower_lips();
 

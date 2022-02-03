@@ -123,7 +123,8 @@ module chassis(){
 			//cube([size,w,size]);
 			difference(){
 				translate([size/2,size/2,0])   rounded_cube(size,size,size,rc+w+1.0,rc+w+1.0,rc+w+1.0);
-				translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc+1,rc+1,rc+1);
+				//translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc+1,rc+1,rc+1);
+				translate([size+w2,size+w2,w]) rounded_cube(2*size,2*size,2*size,rc+8,rc+8,rc+8);
 			}
 			//translate([deep,deep,0]) tube_int(size,r,r,w);
 			// tube ext
