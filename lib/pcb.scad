@@ -146,6 +146,21 @@ module sd1306(feet_height, draw_pcb,draw_feet){
 }
 
 
+stepper_controller_pcb=  [34.65,32,1.53];	
+stepper_controller_hole= [29.5,29.5,hole_len]; 	
+stepper_controller_top=  [27,30,8.7];
+stepper_controller_bot=  [24,24,0.5];
+
+module stepper_controller(feet_height, draw_pcb,draw_feet){
+	hole= stepper_controller_hole;
+	pcb=  stepper_controller_pcb  ;
+	top=  stepper_controller_top  ;
+	bot=  stepper_controller_bot  ;
+	pcb_module(pcb,hole,hole_dia,bot,top,feet_height,draw_pcb,draw_feet);
+	color("Olive") % scale([0.3,0.3,1]) translate([0,0,pcb[2]+top[2]+5]) text("step ctrl", halign="center", valign="center", font="Arial black");
+
+}
+
 
 
 

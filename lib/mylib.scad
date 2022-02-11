@@ -114,6 +114,10 @@ module cubeXYZ0(xSize,ySize,zSize){
 	translate([xSize/2,ySize/2,zSize/2]) cube([abs(xSize),abs(ySize),abs(zSize)],center=true);
 }
 
+module cubeXY0(xSize,ySize,zSize){
+	translate([xSize/2,ySize/2,0]) cube([abs(xSize),abs(ySize),abs(zSize)],center=true);
+}
+
 module skiletZ0(xSize,ySize,zSize,step=0.8,w=0.1){
     for(y=[-ySize/2:step:ySize/2]){
 		for(x=[-xSize/2:step:xSize/2]){
