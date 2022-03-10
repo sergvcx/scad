@@ -1,6 +1,8 @@
+
 include <../../lib/pcb.scad>
 include <../../lib/arduino.scad>
-
+include <../../lib/nuts_and_bolts.scad>
+render = 0;
 
 
 
@@ -111,16 +113,17 @@ PCBW=PCBWidth;
 	//	translate([nodeMCU_pcb[0]/2,nodeMCU_pcb[1]/2,Height-Thick-nodeMCU_pcb[2]-5])  nodeMCU (-5,draw_pcb,draw_feet);
 	//	translate([-sd1306_pcb[1]/2,nodeMCU_pcb[1]/2,Height-Thick-sd1306_pcb[2]-1.6])  	rotate([0,0,90]) sd1306(-1.6,draw_pcb,draw_feet);
 	//}
-	translate([3*Thick,Thick,Thick]){
-		translate([usb18650_pcb[0]/2+1,	usb18650_pcb[1]/2+0.5, 5]) usb18650(5,draw_pcb,draw_feet);
-		translate([nodeMCU_pcb[1]/2,	inbox[1]-nodeMCU_pcb[0]/2,8]) rotate([180,0,90]) nodeMCU (-8,draw_pcb,draw_feet);
-		translate([inbox[0]-stepper_controller_pcb[0]/2-1 ,inbox[1]-stepper_controller_pcb[1]/2-1,5])  stepper_controller (5,draw_pcb,draw_feet);
+	if (BShell){
+		translate([3*Thick,Thick,Thick]){
+			translate([usb18650_pcb[0]/2+1,	usb18650_pcb[1]/2+0.5, 5]) usb18650(5,draw_pcb,draw_feet);
+			translate([nodeMCU_pcb[1]/2,	inbox[1]-nodeMCU_pcb[0]/2,8]) rotate([180,0,90]) nodeMCU (-8,draw_pcb,draw_feet);
+			translate([inbox[0]-stepper_controller_pcb[0]/2-1 ,inbox[1]-stepper_controller_pcb[1]/2-1,5])  stepper_controller (5,draw_pcb,draw_feet);
+		}
+		if (draw_pcb){
+			translate([Length/2-1, Width/2, Thick-4]) rotate([0,180,180]) stepper ();
+			translate([Length/2-1, Width/2, Thick-4]) rotate([0,180,180]) stepper_holes (r=1.5,h=15);
+		}
 	}
-	if (draw_pcb){
-		translate([Length/2-1, Width/2, Thick-4]) rotate([0,180,180]) stepper ();
-		translate([Length/2-1, Width/2, Thick-4]) rotate([0,180,180]) stepper_holes (r=1.5,h=15);
-	}
-	
 
 	//translate([sd1306_pcb[0]+6,nodeMCU_pcb[1]/2+2*Thick,0])
 	//translate([Length-6,0,0])
@@ -302,7 +305,7 @@ if(BPanel==1){
 	difference(){
 		union() {
 			translate ([-m/2,0,0])	Panels();
-		
+			
 		}	
 		
 		
@@ -348,7 +351,7 @@ if(BShell==1){
 				translate([Length/2-1, Width/2+8, Thick-4]) cylinder(10,21,21);
 				translate([Length/2-1, Width/2+8, Thick-4]) cubeYZ0(10,21,21);
 			}
-				
+			
 			
 		}
 	
@@ -359,22 +362,37 @@ if(BShell==1){
 
 if(TShell==1){
 // Coque haut - Top Shell
+	d =30;
 	difference(){
 		color( Couleur1,1){
 			translate([0,Width,Height+0.2]){
 				rotate([0,180,180]){
 						Coque();
+						
 				}
 			}
+			translate([Length/2,Width/2,Height]){
+				translate([d,-d, 0]) 	rotate([180,0,0]) cylinder(h=8,r=8);	
+				translate([d,d,  0]) 	rotate([180,0,0]) cylinder(h=8,r=8);	
+				translate([-d,d, 0]) 	rotate([180,0,0]) cylinder(h=8,r=8);	
+				translate([-d,-d,0]) 	rotate([180,0,0]) cylinder(h=8,r=8);	
+
+			}
 		}
-		electro(draw_pcb=true,draw_feet=false);
+		translate([Length/2,Width/2,Height-8-0.1]){
+				translate([d,-d, 0]) 	rotate([180,0,0]) hex_bolt_m7(-100);	
+				translate([d,d,  0]) 	rotate([180,0,0]) hex_bolt_m7(-100);	
+				translate([-d,d, 0]) 	rotate([180,0,0]) hex_bolt_m7(-100);	
+				translate([-d,-d,0]) 	rotate([180,0,0]) hex_bolt_m7(-100);	
+		}
+		//electro(draw_pcb=true,draw_feet=false);
 		//translate([50,10, 10]) cube([20,50,30]);
-		translate ([13,8,Height-Thick-extusb_in_dim[0]/2])	rotate([0,90,90]) usb_holder(false,true);
+		//translate ([13,8,Height-Thick-extusb_in_dim[0]/2])	rotate([0,90,90]) usb_holder(false,true);
 	}
-	electro(draw_pcb=false,draw_feet=true);
-	translate ([13,8,Height-Thick-extusb_in_dim[0]/2])	rotate([0,90,90]) usb_holder(true,false);
+	//electro(draw_pcb=false,draw_feet=true);
+	//translate ([13,8,Height-Thick-extusb_in_dim[0]/2])	rotate([0,90,90]) usb_holder(true,false);
 }
-if (0)
+if (1)
 	//translate([9,Thick,Thick])
 	electro(draw_pcb=true,draw_feet=true);
 

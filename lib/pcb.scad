@@ -3,14 +3,14 @@ foot_dia = 3.5;
 hole_dia = 2;
 hole_len = 5;
 usb18650_pcb=  [99.14,29.5,1.6];
-usb18650_hole=[94.54,24.5,hole_len];
+usb18650_hole=[94.5,24.5,hole_len];
 usb18650_top=  [78.5,23,21];
 usb18650_bot=  [94,25,3];
 usb18650_sw =  [9,10,7];
 
 
 usb_out_dim=[14.2,14.5,6.7];
-usb_in_dim =[10+2,7.5+1,2+1];
+usb_in_dim =[10+2,7.5+1,2+1.0+1];
 
 
 
@@ -97,7 +97,7 @@ module usb18650(feet_height, draw_pcb,draw_feet){
 	pcb_module(pcb,hole,hole_dia,bot,top,feet_height, draw_pcb,draw_feet);
 	if (draw_pcb){
 		color("Red") translate([pcb[0]/2-usb_out_dim[0]/2,-usb_out_dim[1]/2+1,pcb[2]]) cube(usb_out_dim);
-		color("Red") translate([-pcb[0]/2+10,-pcb[1]/2,0]) rotate([0,0,90]) cubeZ0(usb_in_dim[0],usb_in_dim[1],-usb_in_dim[2]);
+		color("Red") translate([-pcb[0]/2+10,-pcb[1]/2,0+1]) rotate([0,0,90]) cubeZ0(usb_in_dim[0],usb_in_dim[1],-usb_in_dim[2]);
 		color("Red") translate([pcb[0]/2-13,-pcb[1]/2,pcb[2]+1]) rotate([0,0,90]) cube(sw,center=true);
 		color("Olive") % scale([0.5,0.5,1]) translate([0,0,pcb[2]+top[2]]) text("usb18650", halign="center", valign="center", font="Arial black");	
 	}
@@ -112,7 +112,7 @@ module nodeMCU(feet_height, draw_pcb,draw_feet){
 	pcb_module(pcb,hole,hole_dia,bot,top,feet_height,draw_pcb,draw_feet);
 	color("Olive") % scale([0.5,0.5,1]) translate([0,0,pcb[2]+top[2]]) text("nodeMCU", halign="center", valign="center", font="Arial black");
 	color("Green") if (draw_pcb){
-		translate([pcb[0]/2,0,pcb[2]]) cubeZ0(usb_in_dim[0],usb_in_dim[1],usb_in_dim[2]);
+		translate([pcb[0]/2,0,pcb[2]-0.5]) cubeZ0(usb_in_dim[0],usb_in_dim[1],usb_in_dim[2]);
 		translate([led[0],led[1],0])  cylinder(10,1.5,1.5) ;
 		translate([0,pcb[1]/2,0])  	cubeYZ0(38,-2.5,-17);
 		translate([0,-pcb[1]/2,0])  	cubeYZ0(38,2.5,-17);
@@ -147,7 +147,7 @@ module sd1306(feet_height, draw_pcb,draw_feet){
 
 
 stepper_controller_pcb=  [34.65,32,1.53];	
-stepper_controller_hole= [29.5,29.5,hole_len]; 	
+stepper_controller_hole= [29.5,26.5,hole_len]; 	
 stepper_controller_top=  [27,30,8.7];
 stepper_controller_bot=  [24,24,0.5];
 
