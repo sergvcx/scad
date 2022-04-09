@@ -1,19 +1,21 @@
 //------------------------------------- start direction  -----------------------------------
 //module (aX0,az0,ay0,ax0){
-aX0= 0;
+aX0= 10;
 //az0=-15;
-az0=0;
+az0=10;
 //ay0=-25;
-ay0=0;
+ay0=10;
 ax0= 30;
 
 k0=cos(aX0);
 n0=sin(aX0);
+
+
 mX0 = [ 
 		[ 1, 0,   0		,0],
 		[ 0, k0,  -n0	,0],
 		[ 0, n0,  k0	,0],
-		[ 0,  0,   0,   ,1]
+		[ 0,  0,   0    ,1]
        ];
 
 e0=cos(az0);
@@ -60,7 +62,7 @@ mX1 = [
 		[ 1, 0,   0		,0],
 		[ 0, k1, -n1	,0],
 		[ 0, n1,  k1	,0],
-		[ 0,  0,   0,   ,1]
+		[ 0,  0,   0    ,1]
        ];
 
 e1=cos(az1);
@@ -88,13 +90,13 @@ mx1 = [
 		[ 0,  0,  0, 	1]
        ];
 
-//-------------------------------------
 T = [ 
 		[ e0*c0, 	e0*d0*b0-f0*a0,		e0*d0*a0+f0*b0,	0],
 		[ f0*c0,	f0*d0*b0+e0*a0, 	f0*d0*a0-e0*b0,	0],
 		[ -d0, 		c0*b0, 				c0*a0,			0],
 		[ 0,  		0,  				0, 				1]
     ];
+//-------------------------------------
 
 
 echo ("mX1=",mX1);
@@ -117,10 +119,10 @@ az2 = asin(F1);
 echo("az2=",az2);
 
 //x2= 4.2-10;//asin(c0/C1*b0) ;
-q = e0*d0*a0+f0*b0;
-echo("q=",q);
-a = E1*D1;
-b = F1;
+///q = e0*d0*a0+f0*b0;
+///echo("q=",q);
+///A = E1*D1;
+///B = F1;
 
 // q = a*sqrt(1-s*s)+b*s
 // q - b*s = a*sqrt(1-s*s)
@@ -130,11 +132,12 @@ b = F1;
 
 // Имеем квадратнео уравнение
 // (a*a+b*b)*s*s - 2*q*b*s + q*q-a*a=0
-echo("a=",a);
-echo("b=",b);
-echo("q=",q);
-echo("a*a+b*b=",a*a+b*b);
-echo("q*q-a*a=",q*q-a*a);
+///echo("A=",A);
+///echo("B=",B);
+///echo("q=",q);
+///echo("a*a+b*b=",a*a+b*b);
+///echo("q*q-a*a=",q*q-a*a);
+
 //if (a*a+b*b==0){
 	// Решаем для  (a*a+b*b)==0
 	//  - 2*q*b*s + q*q-a*a=0
@@ -153,7 +156,7 @@ echo("q*q-a*a=",q*q-a*a);
  //s  = (q*b + a*sqrt(-q*q+a*a+b*b))/(a*a+b*b);
  //s_ = (q*b - a*sqrt(-q*q+a*a+b*b))/(a*a+b*b);
 //}
-echo("s+=",s);
+//echo("s+=",s);
 //echo("s-=",s_);
 
 
@@ -194,7 +197,7 @@ color ("Green") multmatrix(m=mX1*mz1*my1*mx1) dji();
 //rotate([X1,0, 0]) rotate([0,0, z1]) rotate([0,y1, 0]) rotate([x1,0,0]) dji();
 
 // ----------------- compensation --------------------
-//color ("Blue") rotate([aX1,0, 0]) rotate([0,0, az2]) rotate([0,ay2, 0]) rotate([ax2,0,0]) dji();
+color ("Blue") rotate([aX1,0, 0]) rotate([0,0, az2]) rotate([0,ay2, 0]) rotate([ax2,0,0]) dji();
 // or 
 
 //color ("Blue ") multmatrix(m=mX1*mz2*my2*mx2) dji();
@@ -223,3 +226,24 @@ multmatrix(m = [ [cos(angle), -sin(angle), 1, 10],
    cylinder(r=10.0,h=10,center=false);
    cube(size=[10,10,10],center=false);
 }*/
+
+echo ("--------------------- rotation ---------------");
+a=a0;
+b=b0;
+c=c0;
+d=d0;
+e=e0;
+f=f0;
+n=n0;
+k=k0;
+
+Q = [
+[e*c,		e*d*b-f*a,			e*d*a+f*b,			0],
+[k*f*c+n*d, k*(f*d*b+e*a)-n*c*b,k*(f*d*a-e*b)-n*c*a,0],
+[n*f*c-k*d,	n*(f*d*b+e*a)+k*c*b,n*(f*d*a-e*b)+k*c*a,0],
+[0,			0,					0,					1]
+];
+
+echo ("Q=",Q);
+
+!color ("Orange") multmatrix(m=Q) dji();
